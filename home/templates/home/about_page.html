@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static wagtailcore_tags %}
+
+{% block title %}Into the Moss | About{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>A sunken raft of weeds woven into a verdant morass of sound, song and story</h2>
+  <p>Broadcast on London's <a href="https://resonancefm.com">Resonance 104.4 FM</a> every Thursday, <em>Into the Moss</em> is a 14 minute drift through original music, soundscapes and liminal yarns.</p>
+  
+  <h3><em>Into the Moss</em> is also available via these reputable outlets:</h3>
+  <p>
+    {% for link in page.platform_links.all %}
+      <a target="_blank" href="{{ link.url }}">{{ link.title }}</a>{% if not forloop.last %} | {% endif %}
+    {% endfor %}
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+</style>
+{% endblock %}

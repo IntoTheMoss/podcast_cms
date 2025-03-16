@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  web:
+    build: ./intothemoss_cms
+    restart: always
+    command: gunicorn intothemoss_cms.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./intothemoss_cms:/code
+      - ./media:/code/media
+      - ./static:/code/static
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://intothemoss_user:Pram0wler?@db:5432/intothemoss_db
+      - DJANGO_SETTINGS_MODULE=intothemoss_cms.settings.production
+      
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+    environment:
+      - POSTGRES_DB=intothemoss_db
+      - POSTGRES_USER=intothemoss_user
+      - POSTGRES_PASSWORD=Pram0wler?
+
+volumes:
+  postgres_data:

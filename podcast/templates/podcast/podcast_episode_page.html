@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static wagtailcore_tags wagtailimages_tags %}
+
+{% block title %}Into the Moss | {{ page.title }}{% endblock %}
+
+{% block content %}
+<div class="episode-player-container">
+  <div id="episode-player" style="{% if page.cover_image %}background-image:url({% image page.cover_image original format-webp as webp_img %}{{ webp_img.url }}){% else %}background-image:url({% static 'images/default-cover.webp' %}){% endif %}">
+    <div class="player-info-container">
+      <div id="player-info">
+        <h1>{{ page.episode_number }}: {{ page.title }}</h1>
+        <audio controls src="{{ page.audio_file.url }}"></audio>
+        <p>{{ page.description|richtext }}</p>
+        <p>First broadcast on <a href="https://resonancefm.com" target="_blank">Resonance 104.4 FM</a>, {{ page.publication_date|date:"d M Y" }}.</p>
+        <p><a href="{% slugurl 'podcast' %}">← Back to episodes</a> {% if page.transcript %}&nbsp; <a class="expander" id="transcript-toggle">Episode text ↓</a>{% endif %}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if page.transcript %}
+<div class="episode-text" id="episode-transcript">
+  {{ page.transcript|richtext }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if page.transcript %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const transcriptToggle = document.getElementById('transcript-toggle');
+    const transcript = document.getElementById('episode-transcript');
+    
+    transcriptToggle.addEventListener('click', function() {
+      if (transcript.style.display === 'block') {
+        transcript.style.display = 'none';
+        transcriptToggle.textContent = 'Episode text ↓';
+      } else {
+        transcript.style.display = 'block';
+        transcriptToggle.textContent = 'Episode text ↑';
+      }
+    });
+  });
+</script>
+{% endif %}
+{% endblock %}
