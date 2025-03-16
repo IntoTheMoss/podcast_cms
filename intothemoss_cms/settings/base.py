@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+env = os.environ.copy()
+
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
@@ -88,9 +90,9 @@ WSGI_APPLICATION = "intothemoss_cms.wsgi.application"
 DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'intothemoss_local',
-        'USER': 'intothemoss_user',
-        'PASSWORD': 'Pram0wler?',
+        'NAME': env.get('DB_NAME'),
+        'USER': env.get('DB_USER'),
+        'PASSWORD': env.get('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '',
     }
