@@ -1,7 +1,9 @@
 import os
+import os.path
 import xml.etree.ElementTree as ET
 import requests
 import datetime
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
@@ -12,10 +14,12 @@ from PIL import Image as PILImage
 from io import BytesIO
 from wagtail.images.models import Image
 from wagtail.images import get_image_model
+from wagtail.models import Page
 
 
 class Command(BaseCommand):
     help = "Migrate existing podcast episodes from feed.xml to Wagtail CMS"
+    MEDIA_ROOT = settings.MEDIA_ROOT
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -29,11 +33,47 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # Find the PodcastIndexPage (create if doesn't exist)
+        # Find the PodcastIndexPage or create if it doesn't exist
+        podcast_index = PodcastIndexPage.objects.live().first()
+
+        if not podcast_index:
+            self.stdout.write(
+                self.style.WARNING("No PodcastIndexPage found. Creating one...")
+            )
+
+            # Find the home page to add the podcast index under
+            home_page = Page.objects.filter(slug="home").first()
+
+            if not home_page:
+                self.stdout.write(
+                    self.style.ERROR(
+                        "No home page found. Cannot create PodcastIndexPage."
+                    )
+                )
+                return
+
+            # Create a new podcast index
+            podcast_index = PodcastIndexPage(
+                title="Podcast",
+                slug="podcast",
+                intro="A sunken raft of weeds woven into a verdant morass of sound, song and story.",
+            )
+
+            # Add to the home page
+            home_page.add_child(instance=podcast_index)
+
+            # Publish the page
+            revision = podcast_index.save_revision()
+            revision.publish()
+
+            self.stdout.write(self.style.SUCCESS("Created new PodcastIndexPage"))
+
         podcast_index = PodcastIndexPage.objects.live().first()
         if not podcast_index:
             self.stdout.write(
-                self.style.ERROR("No PodcastIndexPage found. Please create one first.")
+                self.style.ERROR(
+                    "Failed to create or retrieve PodcastIndexPage. Aborting."
+                )
             )
             return
 
@@ -175,7 +215,8 @@ class Command(BaseCommand):
 
             # Check for local audio file first
             audio_content = None
-            local_audio_path = os.path.join("media", "episodes", audio_filename)
+            local_audio_path = os.path.join(self.MEDIA_ROOT, "episodes", audio_filename)
+            self.stdout.write(f"Checking for local audio file: {local_audio_path}")
             if os.path.exists(local_audio_path):
                 self.stdout.write(
                     f"Using local audio file for episode {episode_number}: {local_audio_path}"
@@ -202,11 +243,13 @@ class Command(BaseCommand):
             if image_elem is not None:
                 image_url = image_elem.get("href")
                 image_filename = os.path.basename(image_url)
+                image_title = f"Episode {episode_number} Cover"
 
                 # Check for local image file first
                 local_image_path = os.path.join(
-                    "media", "original_images", image_filename
+                    self.MEDIA_ROOT, "original_images", image_filename
                 )
+                self.stdout.write(f"Checking for local image file: {local_image_path}")
 
                 if os.path.exists(local_image_path):
                     self.stdout.write(
