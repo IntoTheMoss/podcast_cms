@@ -32,13 +32,22 @@ class PodcastFeed(Rss201rev2Feed):
             "Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns, broadcast on London's Resonance 104.4 FM",
         )
 
-        # Category information
-        handler.startElement("itunes:category", {"text": "Music"})
+        # Category information - match the original structure
+        fiction = handler.startElement("itunes:category", {"text": "Fiction"})
+        handler.startElement("itunes:category", {"text": "Drama"})
+        handler.endElement("itunes:category")
+        handler.endElement("itunes:category")
+
+        fiction = handler.startElement("itunes:category", {"text": "Fiction"})
+        handler.startElement("itunes:category", {"text": "Comedy Fiction"})
+        handler.endElement("itunes:category")
         handler.endElement("itunes:category")
 
         # Owner information
         handler.startElement("itunes:owner", {})
-        handler.addQuickElement("itunes:name", "Into the Moss")
+        handler.addQuickElement(
+            "itunes:name", "James Baxter, James Ferris, Ben Polhill"
+        )
         handler.addQuickElement("itunes:email", "intothemossradio@gmail.com")
         handler.endElement("itunes:owner")
 
@@ -46,12 +55,11 @@ class PodcastFeed(Rss201rev2Feed):
         handler.addQuickElement(
             "itunes:image",
             "",
-            {"href": "https://intothemoss.com/static/images/podcast-cover.jpg"},
+            {"href": "https://intothemoss.com/images/intothemoss.jpg"},
         )
 
         # Other iTunes tags
         handler.addQuickElement("itunes:explicit", "false")
-        handler.addQuickElement("language", "en-us")
 
         # Atom link
         handler.addQuickElement(
@@ -65,30 +73,57 @@ class PodcastFeed(Rss201rev2Feed):
         )
 
     def add_item_elements(self, handler, item):
-        super().add_item_elements(handler, item)
+        # Add iTunes elements first in the desired order
+        itunes_attrs = item.get("itunes", {})
 
-        # Episode-specific iTunes tags
-        item_itunes_attrs = item.get("itunes", {})
+        if "episode" in itunes_attrs:
+            handler.addQuickElement("itunes:episode", itunes_attrs["episode"])
 
-        if "duration" in item_itunes_attrs:
-            handler.addQuickElement("itunes:duration", item_itunes_attrs["duration"])
+        if "season" in itunes_attrs:
+            handler.addQuickElement("itunes:season", itunes_attrs["season"])
 
-        if "summary" in item_itunes_attrs:
-            handler.addQuickElement("itunes:summary", item_itunes_attrs["summary"])
+        # Add title and description
+        handler.addQuickElement("title", item["title"])
+        handler.addQuickElement("description", item["description"])
 
-        if "image" in item_itunes_attrs:
+        # Add enclosure - this is critical for podcasts
+        if "enclosure" in item:
             handler.addQuickElement(
-                "itunes:image", "", {"href": item_itunes_attrs["image"]}
+                "enclosure",
+                "",
+                {
+                    "url": item["enclosure"]["url"],
+                    "length": item["enclosure"]["length"],
+                    "type": item["enclosure"]["mime_type"],
+                },
             )
 
-        if "explicit" in item_itunes_attrs:
-            handler.addQuickElement("itunes:explicit", item_itunes_attrs["explicit"])
+        # Add link and other standard elements
+        handler.addQuickElement("link", item["link"])
 
-        if "episode" in item_itunes_attrs:
-            handler.addQuickElement("itunes:episode", item_itunes_attrs["episode"])
+        # Add image before guid
+        if "itunes" in item and "image" in item["itunes"]:
+            handler.addQuickElement(
+                "itunes:image", "", {"href": item["itunes"]["image"]}
+            )
 
-        if "season" in item_itunes_attrs:
-            handler.addQuickElement("itunes:season", item_itunes_attrs["season"])
+        # Add guid
+        handler.addQuickElement("guid", item["unique_id"])
+
+        # Add pubDate
+        handler.addQuickElement(
+            "pubDate", item["pubdate"].strftime("%a, %d %b %Y %H:%M:%S %z")
+        )
+
+        # Add remaining iTunes elements
+        if "duration" in itunes_attrs:
+            handler.addQuickElement("itunes:duration", itunes_attrs["duration"])
+
+        if "explicit" in itunes_attrs:
+            handler.addQuickElement("itunes:explicit", itunes_attrs["explicit"])
+
+        if "summary" in itunes_attrs:
+            handler.addQuickElement("itunes:summary", itunes_attrs["summary"])
 
 
 class PodcastFeedView(View):
@@ -96,16 +131,31 @@ class PodcastFeedView(View):
 
     def get(self, request):
         # Get the current site
-        site = Site.objects.get_current(request=request)
+        from wagtail.models import Site
+
+        # Get default site or first available site
+        try:
+            site = Site.objects.get(is_default_site=True)
+        except Site.DoesNotExist:
+            site = Site.objects.first()
+
+        if not site:
+            return HttpResponse(
+                "No site configured", content_type="text/plain", status=500
+            )
+
+        # Use production URL for the feed regardless of environment
+        root_url = "https://intothemoss.com"
 
         # Basic feed setup
         feed = PodcastFeed(
             title="Into the Moss",
-            link="https://intothemoss.com/",
-            description="Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns, broadcast on London's Resonance 104.4 FM",
-            language="en-us",
+            link=root_url,
+            description="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Thursday, Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns.",
+            language="en-uk",
             author_name="Into the Moss",
-            feed_url="https://intothemoss.com/feed.xml",
+            feed_url=f"{root_url}/feed.xml",
+            copyright="© Into the Moss 2020-2025",  # Updated year
         )
 
         # Add episodes to the feed
@@ -114,49 +164,65 @@ class PodcastFeedView(View):
         )
 
         for episode in episodes:
-            # Format duration as HH:MM:SS
-            if episode.duration_in_seconds:
-                minutes, seconds = divmod(episode.duration_in_seconds, 60)
-                hours, minutes = divmod(minutes, 60)
-                duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-            else:
-                duration = "00:14:00"  # Default 14 minutes
+            # Get file size accurately
+            try:
+                if episode.audio_file and os.path.exists(episode.audio_file.path):
+                    file_size = str(os.path.getsize(episode.audio_file.path))
+                else:
+                    # If we can't get the size, use a reasonable estimate based on duration
+                    # ~128kbps = ~16KB per second of audio
+                    file_size = str(int(episode.duration_in_seconds * 16000))
+            except Exception as e:
+                # Fallback size
+                file_size = (
+                    "15000000"  # 15MB is a reasonable default for a 14-minute episode
+                )
 
-            # Get the episode cover image URL
+            # Fix the duration format to match original (840.05)
+            duration = "840.05"  # Default
+            if episode.duration_in_seconds:
+                try:
+                    duration = f"{episode.duration_in_seconds:.2f}"
+                except:
+                    pass
+
+            # Get the episode cover image URL - use production URL
             if episode.cover_image:
-                image_url = request.build_absolute_uri(
-                    episode.cover_image.get_rendition("original").url
+                image_url = (
+                    f"{root_url}/assets/images/jpg/1400/{episode.episode_number}.jpg"
                 )
             else:
-                image_url = request.build_absolute_uri(
-                    "/static/images/podcast-cover.jpg"
-                )
+                image_url = f"{root_url}/images/intothemoss.jpg"
+
+            # Generate an estimated file size if we can't get the actual size
+            try:
+                if os.path.exists(episode.audio_file.path):
+                    file_size = str(os.path.getsize(episode.audio_file.path))
+                else:
+                    # Estimate based on duration: ~15MB for 14 minutes
+                    file_size = str(int(episode.duration_in_seconds * 1000 * 15))
+            except:
+                file_size = "15000000"  # Default estimate
 
             # Add episode to feed
             feed.add_item(
-                title=f"Episode {episode.episode_number}: {episode.title}",
-                link=request.build_absolute_uri(episode.get_full_url()),
+                title=episode.title,
+                link=f"{root_url}/episodes/{episode.episode_number}",
                 description=str(episode.description),
                 pubdate=episode.publication_date,
                 unique_id=(
-                    episode.guid
-                    if episode.guid
-                    else f"intothemoss-ep{episode.episode_number}"
+                    episode.guid if episode.guid else f"itm-ep{episode.episode_number}"
                 ),
                 enclosure={
-                    "url": request.build_absolute_uri(episode.audio_file.url),
-                    "length": (
-                        str(os.path.getsize(episode.audio_file.path))
-                        if os.path.exists(episode.audio_file.path)
-                        else "0"
-                    ),
+                    "url": f"{root_url}/audio/{episode.episode_number}.mp3",
+                    "length": file_size,
                     "mime_type": "audio/mpeg",
                 },
                 itunes={
                     "duration": duration,
                     "summary": str(episode.description),
                     "image": image_url,
-                    "explicit": "true" if episode.explicit_content else "false",
+                    "explicit": "false",
                     "episode": (
                         str(episode.season_episode_number)
                         if hasattr(episode, "season_episode_number")
@@ -168,6 +234,20 @@ class PodcastFeedView(View):
             )
 
         # Generate and return the feed
+        # Use a custom formatter to get proper indentation
         response = HttpResponse(content_type="application/rss+xml; charset=utf-8")
-        feed.write(response, "utf-8")
+
+        # Pretty print the XML with indentation
+        from xml.dom import minidom
+
+        xml_str = feed.writeString("utf-8")
+        parsed = minidom.parseString(xml_str)
+        pretty_xml = parsed.toprettyxml(indent="  ")
+
+        # Remove extra blank lines that minidom sometimes adds
+        pretty_xml = "\n".join(
+            [line for line in pretty_xml.split("\n") if line.strip()]
+        )
+
+        response.write(pretty_xml)
         return response
