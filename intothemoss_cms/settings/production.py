@@ -3,7 +3,7 @@ import dj_database_url
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Read secret key from environment variable
 SECRET_KEY = os.environ.get('SECRET_KEY', '')
