@@ -2,20 +2,24 @@ version: '3'
 
 services:
   web:
-    build: ./intothemoss_cms
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
-    command: gunicorn intothemoss_cms.wsgi:application --bind 0.0.0.0:8000
-    volumes:
-      - ./intothemoss_cms:/code
-      - ./media:/code/media
-      - ./static:/code/static
-    ports:
-      - "8000:8000"
     depends_on:
       - db
+    volumes:
+      - ./media:/code/media
+      - ./static:/code/static
+      - ./logs:/code/logs
     environment:
-      - DATABASE_URL=postgres://intothemoss_user:Pram0wler?@db:5432/intothemoss_db
+      - DATABASE_URL=postgres://intothemoss_user:${DB_PASSWORD}@db:5432/intothemoss_db
       - DJANGO_SETTINGS_MODULE=intothemoss_cms.settings.production
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DEBUG=False
+    ports:
+      - "8000:8000"
       
   db:
     image: postgres:13
@@ -25,7 +29,24 @@ services:
     environment:
       - POSTGRES_DB=intothemoss_db
       - POSTGRES_USER=intothemoss_user
-      - POSTGRES_PASSWORD=Pram0wler?
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./static:/var/www/static
+      - ./media:/var/www/media
+      - /var/www/intothemoss/audio:/var/www/legacy/audio
+      - /var/www/intothemoss/assets:/var/www/legacy/assets
+      - /var/www/intothemoss/images:/var/www/legacy/images
+    depends_on:
+      - web
+    restart: always
 
 volumes:
   postgres_data:

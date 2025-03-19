@@ -25,8 +25,11 @@ RUN pip install --upgrade pip && \
 # Copy the project code
 COPY . /code/
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Create necessary directories
+RUN mkdir -p /code/static /code/media /code/logs
 
-# Run database migrations
-CMD python manage.py migrate && gunicorn intothemoss_cms.wsgi:application --bind 0.0.0.0:8000
+# Run entrypoint script
+COPY docker-entrypoint.sh /code/
+RUN chmod +x /code/docker-entrypoint.sh
+
+ENTRYPOINT ["/code/docker-entrypoint.sh"]
