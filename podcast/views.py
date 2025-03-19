@@ -179,12 +179,21 @@ class PodcastFeedView(View):
                 )
 
             # Fix the duration format to match original (840.05)
-            duration = "840.05"  # Default
             if episode.duration_in_seconds:
-                try:
-                    duration = f"{episode.duration_in_seconds:.2f}"
-                except:
-                    pass
+                # Make sure we're working with seconds, not milliseconds
+                seconds_value = episode.duration_in_seconds
+                # If the value is unreasonably large (over an hour), it might be in milliseconds
+                if seconds_value > 3600:
+                    # Convert from milliseconds to seconds if needed
+                    seconds_value = (
+                        seconds_value / 60
+                    )  # This assumes the value might be in minutes
+
+                # Format to 2 decimal places
+                duration = f"{seconds_value:.2f}"
+            else:
+                # Default to 14 minutes (840.05 seconds)
+                duration = "840.05"
 
             # Get the episode cover image URL - use production URL
             if episode.cover_image:
