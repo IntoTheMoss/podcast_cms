@@ -9,9 +9,9 @@ services:
     depends_on:
       - db
     volumes:
-      - ./media:/code/media
-      - ./static:/code/static
-      - ./logs:/code/logs
+      - ./media:/code/media:rw
+      - ./static:/code/static:rw
+      - ./logs:/code/logs:rw
     environment:
       - DATABASE_URL=postgres://intothemoss_user:${DB_PASSWORD}@db:5432/intothemoss_db
       - DJANGO_SETTINGS_MODULE=intothemoss_cms.settings.production
