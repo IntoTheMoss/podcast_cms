@@ -34,8 +34,8 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"   # Map container port 80 to host port 8080
+      - "8443:443"  # Map container port 443 to host port 8443
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl

@@ -3,6 +3,9 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
+# Create a non-root user
+RUN groupadd -r wagtail && useradd -r -g wagtail wagtail
+
 WORKDIR /code
 
 # Install system dependencies
@@ -26,10 +29,14 @@ RUN pip install --upgrade pip && \
 COPY . /code/
 
 # Create necessary directories
-RUN mkdir -p /code/static /code/media /code/logs
+RUN mkdir -p /code/static /code/media /code/logs && \
+    chown -R wagtail:wagtail /code
 
-# Run entrypoint script
+# Copy entrypoint script
 COPY docker-entrypoint.sh /code/
 RUN chmod +x /code/docker-entrypoint.sh
+
+# Switch to non-root user
+USER wagtail
 
 ENTRYPOINT ["/code/docker-entrypoint.sh"]
