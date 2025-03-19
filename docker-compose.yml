@@ -31,8 +31,9 @@ services:
       - "8080:80"
       - "8443:443"
     volumes:
-      - ./nginx/conf:/code/nginx/conf
-      - ./nginx/ssl:/code/nginx/ssl
+      - ./nginx/conf:/etc/nginx/conf.d
+      - ./static:/usr/share/nginx/html/static
+      - ./media:/usr/share/nginx/html/media
     depends_on:
       - web
 
