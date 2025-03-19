@@ -4,6 +4,7 @@ beautifulsoup4==4.13.3
 certifi==2025.1.31
 charset-normalizer==3.4.1
 defusedxml==0.7.1
+dj-database-url==2.3.0
 Django==5.1.7
 django-filter==25.1
 django-modelcluster==6.4
@@ -23,6 +24,7 @@ openpyxl==3.1.5
 pillow==11.1.0
 pillow_heif==0.22.0
 psycopg2-binary==2.9.10
+pymemcache==4.0.0
 requests==2.32.3
 soupsieve==2.6
 sqlparse==0.5.3
@@ -31,4 +33,3 @@ typing_extensions==4.12.2
 urllib3==2.3.0
 wagtail==6.4.1
 Willow==1.9.0
-dj-database-url
