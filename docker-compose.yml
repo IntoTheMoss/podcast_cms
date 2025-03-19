@@ -24,6 +24,7 @@ services:
       - POSTGRES_DB=intothemoss_db
       - POSTGRES_USER=intothemoss_user
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - SECRET_KEY=${SECRET_KEY}
 
   nginx:
     image: nginx:latest
