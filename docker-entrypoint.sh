@@ -1,21 +1,17 @@
 #!/bin/bash
 set -e
 
-# Ensure static directory exists and has right permissions
-mkdir -p /code/static
-chmod -R 777 /code/static
-
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput || echo "Warning: collectstatic command failed"
+python manage.py collectstatic --noinput
 
 # Run migrations
 echo "Applying database migrations..."
-python manage.py migrate || echo "Warning: migrate command failed"
+python manage.py migrate
 
 # Fix tree structure if needed
 echo "Fixing tree structure..."
-python manage.py fixtree || echo "Warning: fixtree command failed"
+python manage.py fixtree || echo "Warning: fixtree command failed, but continuing..."
 
 # Start Gunicorn
 echo "Starting Gunicorn..."

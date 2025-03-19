@@ -2,12 +2,10 @@ version: '3'
 
 services:
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     restart: always
-    depends_on:
-      - db
+    ports:
+      - "8000:8000"
     volumes:
       - ./media:/code/media:rw
       - ./static:/code/static:rw
@@ -15,17 +13,13 @@ services:
     environment:
       - DATABASE_URL=postgres://intothemoss_user:${DB_PASSWORD}@db:5432/intothemoss_db
       - DJANGO_SETTINGS_MODULE=intothemoss_cms.settings.production
-      - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - DEBUG=False
-    ports:
-      - "8000:8000"
+    depends_on:
+      - db
       
   db:
     image: postgres:13
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    restart: always
     environment:
       - POSTGRES_DB=intothemoss_db
       - POSTGRES_USER=intothemoss_user
@@ -34,19 +28,13 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "8080:80"   # Map container port 80 to host port 8080
-      - "8443:443"  # Map container port 443 to host port 8443
+      - "8080:80"
+      - "8443:443"
     volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
-      - ./static:/var/www/static
-      - ./media:/var/www/media
-      - /var/www/intothemoss/audio:/var/www/legacy/audio
-      - /var/www/intothemoss/assets:/var/www/legacy/assets
-      - /var/www/intothemoss/images:/var/www/legacy/images
+      - ./nginx/conf:/code/nginx/conf
+      - ./nginx/ssl:/code/nginx/ssl
     depends_on:
       - web
-    restart: always
 
 volumes:
   postgres_data:
