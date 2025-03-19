@@ -6,7 +6,7 @@ from .base import *
 DEBUG = True
 
 # Read secret key from environment variable
-SECRET_KEY = os.environ.get('SECRET_KEY', '')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'default-secret-key')
 
 # Parse database configuration from $DATABASE_URL
 DATABASES = {
