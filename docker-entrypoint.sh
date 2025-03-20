@@ -15,4 +15,10 @@ python manage.py fixtree || echo "Warning: fixtree command failed, but continuin
 
 # Start Gunicorn
 echo "Starting Gunicorn..."
-gunicorn intothemoss_cms.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+gunicorn intothemoss_cms.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 3 \
+    --timeout 60 \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --log-level info
