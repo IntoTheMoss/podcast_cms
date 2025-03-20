@@ -14,7 +14,7 @@ DATABASES = {
 }
 
 # Allow all host headers
-ALLOWED_HOSTS = ['intothemoss.com', 'www.intothemoss.com']
+ALLOWED_HOSTS = ['dev.intothemoss.com', 'www.intothemoss.com']
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
@@ -44,7 +44,7 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'intothemossradio@gmail.com'
 
 # Wagtail settings
-WAGTAILADMIN_BASE_URL = 'https://intothemoss.com'
+WAGTAILADMIN_BASE_URL = 'https://dev.intothemoss.com'
 
 # Cache settings
 CACHES = {
