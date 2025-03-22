@@ -1,0 +1,23 @@
+name: intothemoss-cms
+services:
+  - name: web
+    github:
+      repo: your-username/intothemoss-cms
+      branch: main
+    build_command: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    run_command: gunicorn intothemoss_cms.wsgi:application --workers 3 --timeout 120
+    http_port: 8000
+    envs:
+      - key: DJANGO_SETTINGS_MODULE
+        value: intothemoss_cms.settings.production
+      - key: SECRET_KEY
+        value: "${SECRET_KEY}"
+      - key: DATABASE_URL
+        value: "${DATABASE_URL}"
+    routes:
+      - path: /
+  - name: db
+    engine: PG
+    version: "14"
+    size: basic-xs
+    num_nodes: 1
