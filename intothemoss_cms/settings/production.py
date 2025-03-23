@@ -1,13 +1,7 @@
 import os
 import dj_database_url
 from .base import *
-
-print("Environment variables:")
-for key, value in os.environ.items():
-    if "DATABASE" in key or "POSTGRES" in key:
-        print(f"{key}: {'*' * len(value)}")  # Don't print actual credentials
-
-print(f"DATABASE_URL exists: {'DATABASE_URL' in os.environ}")
+import logging
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -20,6 +14,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
+    logging.info("Configuring Django to use the DATABASE_URL environment variable")
     # Configure database from DATABASE_URL
     DATABASES = {
         "default": dj_database_url.config(
@@ -30,6 +25,7 @@ if DATABASE_URL:
     }
 else:
     # Fallback configuration (should never be used in production)
+    logging.warning("DATABASE_URL not found, falling back to default database settings")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -41,12 +37,11 @@ else:
         }
     }
 
-# Print the database config for debugging (remove in production)
-print(f"Database config: {DATABASES['default']['HOST']}:{DATABASES['default']['PORT']}")
+# Log the database config for debugging (remove in production)
+logging.info(f"Database config: {DATABASES['default']['ENGINE']}")
 
 
-# Allow all host headers from App Platform
-ALLOWED_HOSTS = ["*.ondigitalocean.app", "dev.intothemoss.com", "www.intothemoss.com"]
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 # Static files - App Platform specific
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
