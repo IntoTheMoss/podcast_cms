@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static wagtailcore_tags wagtailimages_tags %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailuserbar %}
 
 {% block title %}Into the Moss | {{ page.title }}{% endblock %}
 
@@ -12,7 +12,7 @@
         <audio controls src="{{ page.audio_file.url }}"></audio>
         <p>{{ page.description|richtext }}</p>
         <p>First broadcast on <a href="https://resonancefm.com" target="_blank">Resonance 104.4 FM</a>, {{ page.publication_date|date:"d M Y" }}.</p>
-        <p><a href="{% slugurl 'podcast' %}">← Back to episodes</a> {% if page.transcript %}&nbsp; <a class="expander" id="transcript-toggle">Episode text ↓</a>{% endif %}</p>
+        <p><a href="/">← All episodes</a> {% if page.transcript %}&nbsp; <a class="expander" id="transcript-toggle">Transcript ↓</a>{% endif %}</p>
       </div>
     </div>
   </div>
@@ -23,6 +23,11 @@
   {{ page.transcript|richtext }}
 </div>
 {% endif %}
+
+{% block wagtailuserbar %}
+    {% wagtailuserbar %}
+{% endblock wagtailuserbar %}
+
 {% endblock %}
 
 {% block extra_js %}
@@ -35,13 +40,17 @@
     transcriptToggle.addEventListener('click', function() {
       if (transcript.style.display === 'block') {
         transcript.style.display = 'none';
-        transcriptToggle.textContent = 'Episode text ↓';
+        transcriptToggle.textContent = 'Transcript ↓';
+        // TODO:
+        //window.scrollIntoView(transcript);
+        transcript.scrollIntoView();
       } else {
         transcript.style.display = 'block';
-        transcriptToggle.textContent = 'Episode text ↑';
+        transcriptToggle.textContent = 'Transcript ↑';
       }
     });
   });
 </script>
 {% endif %}
 {% endblock %}
+

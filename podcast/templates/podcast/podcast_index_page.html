@@ -1,5 +1,5 @@
 {% extends "base.html" %} 
-{% load static wagtailcore_tags wagtailimages_tags %}
+{% load static wagtailcore_tags wagtailimages_tags wagtailuserbar %}
 {% block title %}Into the Moss{% endblock %} 
 {% block main_class %}home{%endblock %}
 {% block content %}
@@ -110,6 +110,10 @@
   </a>
 </div>
 {% endfor %}
+
+{% block wagtailuserbar %}
+    {% wagtailuserbar %}
+{% endblock wagtailuserbar %}
 
 <script src="{% static 'js/podcast_index_page.js' %}"></script>
 
