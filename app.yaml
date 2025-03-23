@@ -1,10 +1,4 @@
 name: intothemoss-cms
-databases:
-  - name: podcast-db
-    engine: PG
-    version: "14"
-    size: basic-xs
-    num_nodes: 1
 
 services:
   - name: web
