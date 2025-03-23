@@ -9,7 +9,7 @@ databases:
 services:
   - name: web
     github:
-      repo: your-username/intothemoss-cms
+      repo: IntoTheMoss/podcast_cms
       branch: main
     build_command: pip install -r requirements.txt && python manage.py collectstatic --noinput
     run_command: gunicorn intothemoss_cms.wsgi:application --workers 3 --timeout 120
