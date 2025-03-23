@@ -26,11 +26,12 @@ STATICFILES_DIRS = [
 # Media files - use DO Spaces for production media
 if "SPACES_KEY" in os.environ:
     # Settings for DigitalOcean Spaces
-    AWS_ACCESS_KEY_ID = os.environ.get("SPACES_KEY")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("SPACES_SECRET")
-    AWS_STORAGE_BUCKET_NAME = os.environ.get("SPACES_BUCKET", "intothemoss-media")
-    AWS_S3_ENDPOINT_URL = "https://fra1.digitaloceanspaces.com"
-    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.fra1.digitaloceanspaces.com"
+    AWS_ACCESS_KEY_ID = os.environ.get("SPACES_ACCESS_KEY")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("SPACES_SECRET_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("SPACES_BUCKET_NAME", "intothemoss-media")
+    AWS_S3_ENDPOINT_URL = "f{AWS_STORAGE_BUCKET_NAME}.lon1.digitaloceanspaces.com"
+    AWS_S3_CUSTOM_DOMAIN = "f{AWS_STORAGE_BUCKET_NAME}.lon1.cdn.digitaloceanspaces.com"
+
     AWS_S3_OBJECT_PARAMETERS = {
         "CacheControl": "max-age=86400",
     }
