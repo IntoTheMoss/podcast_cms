@@ -1,6 +1,6 @@
 name: intothemoss-cms
 databases:
-  - name: db
+  - name: podcast-db
     engine: PG
     version: "14"
     size: basic-xs
@@ -14,13 +14,24 @@ services:
     build_command: pip install -r requirements.txt && python manage.py collectstatic --noinput
     run_command: gunicorn intothemoss_cms.wsgi:application --workers 3 --timeout 120
     http_port: 8000
-    env_groups:
-      - name: db-credentials
-        database: db
     envs:
       - key: DJANGO_SETTINGS_MODULE
         value: intothemoss_cms.settings.production
-      - key: SECRET_KEY
-        value: "${SECRET_KEY}"
-    routes:
-      - path: /
+      - key: DJANGO_SECRET_KEY
+        value: ${DJANGO_SECRET_KEY}
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".ondigitalocean.app,dev.intothemoss.com,www.intothemoss.com"
+      - key: DEBUG
+        value: "False"
+      - key: DEVELOPMENT_MODE
+        value: "False"
+      - key: DATABASE_URL
+        value: ${podcast-db.DATABASE_URL}
+      - key: SPACES_KEY
+        value: ${SPACES_KEY}
+      - key: SPACES_SECRET
+        value: ${SPACES_SECRET}
+      - key: SPACES_BUCKET
+        value: "intothemoss-media"
+      - key: SPACES_REGION
+        value: "fra1"
