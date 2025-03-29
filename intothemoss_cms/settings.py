@@ -208,6 +208,11 @@ if not DEBUG:
         "CSRF_TRUSTED_ORIGINS",
         "https://*.ondigitalocean.app,https://dev.intothemoss.com,https://www.intothemoss.com",
     ).split(",")
-    SECURE_SSL_REDIRECT = True
+
+    # Don't force SSL redirect on localhost
+    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
+    if "localhost" in ALLOWED_HOSTS or "127.0.0.1" in ALLOWED_HOSTS:
+        SECURE_SSL_REDIRECT = False
+
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
