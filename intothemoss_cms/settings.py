@@ -1,7 +1,6 @@
 import environ
 import os
 import sys
-import dj_database_url
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
@@ -137,13 +136,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = "/static/"
 
 # Media files
-if "SPACES_KEY" in os.environ:
+if env("SPACES_KEY", default=None):
     # Settings for DigitalOcean Spaces
-    AWS_ACCESS_KEY_ID = os.environ.get("SPACES_KEY")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("SPACES_SECRET")
-    AWS_STORAGE_BUCKET_NAME = os.environ.get("SPACES_BUCKET", "intothemoss-media")
+    AWS_ACCESS_KEY_ID = env("SPACES_KEY")
+    AWS_SECRET_ACCESS_KEY = env("SPACES_SECRET")
+    AWS_STORAGE_BUCKET_NAME = env("SPACES_BUCKET", default="intothemoss-media")
     AWS_S3_ENDPOINT_URL = (
-        f"https://{os.environ.get('SPACES_REGION', 'fra1')}.digitaloceanspaces.com"
+        f"https://{env('SPACES_REGION', default='fra1')}.digitaloceanspaces.com"
     )
     AWS_S3_OBJECT_PARAMETERS = {
         "CacheControl": "max-age=86400",
@@ -151,7 +150,7 @@ if "SPACES_KEY" in os.environ:
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
     # Generate the URL for media files
-    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{os.environ.get('SPACES_REGION', 'fra1')}.cdn.digitaloceanspaces.com"
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{env('SPACES_REGION', default='fra1')}.cdn.digitaloceanspaces.com"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -181,7 +180,7 @@ WAGTAILSEARCH_BACKENDS = {
 }
 
 # Base URL for Wagtail admin
-WAGTAILADMIN_BASE_URL = os.getenv("WAGTAILADMIN_BASE_URL", "http://localhost:8000")
+WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL", default="http://localhost:8000")
 
 # Allowed file extensions for documents in the document library
 WAGTAILDOCS_EXTENSIONS = [
@@ -199,13 +198,17 @@ WAGTAILDOCS_EXTENSIONS = [
 
 # Security settings for production
 if not DEBUG:
-    CSRF_TRUSTED_ORIGINS = os.getenv(
+    CSRF_TRUSTED_ORIGINS = env.list(
         "CSRF_TRUSTED_ORIGINS",
-        "https://*.ondigitalocean.app,https://dev.intothemoss.com,https://www.intothemoss.com",
-    ).split(",")
+        default=[
+            "https://dev.intothemoss.com",
+            "https://intothemoss.com",
+            "https://www.intothemoss.com",
+        ],
+    )
 
     # Don't force SSL redirect on localhost
-    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
     if "localhost" in ALLOWED_HOSTS or "127.0.0.1" in ALLOWED_HOSTS:
         SECURE_SSL_REDIRECT = False
 
