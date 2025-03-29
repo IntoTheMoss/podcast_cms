@@ -84,9 +84,11 @@ WSGI_APPLICATION = "intothemoss_cms.wsgi.application"
 
 
 # Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     "default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3"),
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
