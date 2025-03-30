@@ -54,8 +54,8 @@ class Command(BaseCommand):
 
             # Create a new podcast index
             podcast_index = PodcastIndexPage(
-                title="Podcast",
-                slug="podcast",
+                title="Episodes",
+                slug="episodes",
                 intro="A sunken raft of weeds woven into a verdant morass of sound, song and story.",
             )
 
@@ -186,7 +186,7 @@ class Command(BaseCommand):
                 duration_in_seconds = 840  # Default if no duration found
 
             # Generate a slug for the page
-            slug = f"episode-{episode_number:03d}"
+            slug = f"{episode_number:03d}"
 
             # Check if episode already exists
             if PodcastEpisodePage.objects.filter(guid=guid).exists():

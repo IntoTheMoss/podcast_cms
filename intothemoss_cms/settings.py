@@ -206,12 +206,11 @@ if not DEBUG:
             "https://www.intothemoss.com",
         ],
     )
-
-    # Don't force SSL redirect on localhost
-    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
-    if "localhost" in ALLOWED_HOSTS or "127.0.0.1" in ALLOWED_HOSTS:
-        SECURE_SSL_REDIRECT = False
-
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Don't force SSL redirect on localhost
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+if "localhost" in ALLOWED_HOSTS or "127.0.0.1" in ALLOWED_HOSTS:
+    SECURE_SSL_REDIRECT = False

@@ -115,10 +115,11 @@ class PodcastEpisodePage(Page):
         return f"{settings.MEDIA_URL}{self.audio_file}"
 
     def save(self, *args, **kwargs):
+        # Format the slug as episode number with leading zeros as needed
+        self.slug = f"{self.episode_number:03d}"
+
         # Generate GUID if not provided (you might want to adapt this)
         if not self.guid:
-            from datetime import datetime
-
             date_str = self.publication_date.strftime("%Y%m%d")
             self.guid = f"itm{date_str}"
 
