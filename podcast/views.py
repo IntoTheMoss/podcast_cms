@@ -150,7 +150,7 @@ class PodcastFeedView(View):
             feed = PodcastFeed(
                 title="Into the Moss",
                 link=root_url,
-                description="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Thursday, Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns.",
+                description="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast weekly on London's Resonance FM, Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns.",
                 language="en-uk",
                 author_name="Into the Moss",
                 feed_url=f"{root_url}/feed.xml",
@@ -173,9 +173,7 @@ class PodcastFeedView(View):
                         file_size = str(int(episode.duration_in_seconds * 16000))
                 except Exception as e:
                     # Fallback size
-                    file_size = (
-                        "15000000"  # 15MB is a reasonable default for a 14-minute episode
-                    )
+                    file_size = "15000000"  # 15MB is a reasonable default for a 14-minute episode
 
                 # Fix the duration format to match original (840.05)
                 if episode.duration_in_seconds:
@@ -196,9 +194,7 @@ class PodcastFeedView(View):
 
                 # Get the episode cover image URL - use production URL
                 if episode.cover_image:
-                    image_url = (
-                        f"{root_url}/assets/images/jpg/1400/{episode.episode_number}.jpg"
-                    )
+                    image_url = f"{root_url}/assets/images/jpg/1400/{episode.episode_number}.jpg"
                 else:
                     image_url = f"{root_url}/images/intothemoss.jpg"
 
@@ -219,7 +215,9 @@ class PodcastFeedView(View):
                     description=str(episode.description),
                     pubdate=episode.publication_date,
                     unique_id=(
-                        episode.guid if episode.guid else f"itm-ep{episode.episode_number}"
+                        episode.guid
+                        if episode.guid
+                        else f"itm-ep{episode.episode_number}"
                     ),
                     enclosure={
                         "url": f"{root_url}/audio/{episode.episode_number}.mp3",
@@ -261,7 +259,4 @@ class PodcastFeedView(View):
             return response
         except Exception as e:
             error_message = f"Error generating feed: {str(e)}\n{traceback.format_exc()}"
-            return HttpResponse(error_message, content_type='text/plain', status=500)
-
-
-
+            return HttpResponse(error_message, content_type="text/plain", status=500)
