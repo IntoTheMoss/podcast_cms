@@ -92,6 +92,7 @@ class PodcastEpisodePage(Page):
             [
                 FieldPanel("episode_number"),
                 FieldPanel("season_number"),
+                FieldPanel("season_episode_number"),
                 FieldPanel("publication_date"),
             ],
             heading="Episode Information",
