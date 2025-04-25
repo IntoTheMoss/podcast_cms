@@ -111,6 +111,9 @@ class PodcastFeed(Rss201rev2Feed):
         # Add guid
         handler.addQuickElement("guid", item["unique_id"])
 
+        # Add episode id
+        handler.addQuickElement("epid", item["episode_number"])
+
         # Add pubDate
         handler.addQuickElement(
             "pubDate", item["pubdate"].strftime("%a, %d %b %Y %H:%M:%S %z")
@@ -229,12 +232,7 @@ class PodcastFeedView(View):
                         "summary": str(episode.description),
                         "image": image_url,
                         "explicit": "false",
-                        "episode": (
-                            str(episode.season_episode_number)
-                            if hasattr(episode, "season_episode_number")
-                            and episode.season_episode_number
-                            else str(episode.episode_number)
-                        ),
+                        "episode": str(episode.season_episode_number),
                         "season": str(episode.season_number),
                     },
                 )
