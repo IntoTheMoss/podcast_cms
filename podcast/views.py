@@ -112,7 +112,7 @@ class PodcastFeed(Rss201rev2Feed):
         handler.addQuickElement("guid", item["unique_id"])
 
         # Add episode id
-        handler.addQuickElement("epid", item["episode_number"])
+        handler.addQuickElement("epid", item["custom_fields"]["epid"])
 
         # Add pubDate
         handler.addQuickElement(
@@ -235,6 +235,8 @@ class PodcastFeedView(View):
                         "episode": str(episode.season_episode_number),
                         "season": str(episode.season_number),
                     },
+                    # Add custom field for episode ID
+                    custom_fields={"epid": str(episode.episode_number)},
                 )
 
             # Generate and return the feed
