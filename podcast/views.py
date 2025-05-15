@@ -223,7 +223,7 @@ class PodcastFeedView(View):
                         else f"itm-ep{episode.episode_number}"
                     ),
                     enclosure={
-                        "url": f"{root_url}/audio/{episode.episode_number}.mp3",
+                        "url": f"{root_url}/media/episodes/{episode.episode_number}.mp3",
                         "length": file_size,
                         "mime_type": "audio/mpeg",
                     },
