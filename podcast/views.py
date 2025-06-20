@@ -153,11 +153,11 @@ class PodcastFeedView(View):
             feed = PodcastFeed(
                 title="Into the Moss",
                 link=root_url,
-                description="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast weekly on London's Resonance FM, Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns.",
+                description="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Friday, Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns.",
                 language="en-uk",
                 author_name="Into the Moss",
                 feed_url=f"{root_url}/feed.xml",
-                copyright="© Into the Moss 2020-2025",  # Updated year
+                copyright="© Into the Moss 2025",
             )
 
             # Add episodes to the feed
@@ -166,6 +166,9 @@ class PodcastFeedView(View):
             )
 
             for episode in episodes:
+                # Zero-pad the episode number for consistent formatting
+                episode_padded = f"{episode.episode_number:03d}"
+
                 # Get file size accurately
                 try:
                     if episode.audio_file and os.path.exists(episode.audio_file.path):
@@ -195,9 +198,11 @@ class PodcastFeedView(View):
                     # Default to 14 minutes (840.05 seconds)
                     duration = "840.05"
 
-                # Get the episode cover image URL - use production URL
+                # Get the episode cover image URL - use production URL with zero-padded episode number
                 if episode.cover_image:
-                    image_url = f"{root_url}/assets/images/jpg/1400/{episode.episode_number}.jpg"
+                    image_url = (
+                        f"{root_url}/assets/images/jpg/1400/{episode_padded}.jpg"
+                    )
                 else:
                     image_url = f"{root_url}/images/intothemoss.jpg"
 
@@ -211,10 +216,10 @@ class PodcastFeedView(View):
                 except:
                     file_size = "15000000"  # Default estimate
 
-                # Add episode to feed
+                # Add episode to feed with zero-padded URLs
                 feed.add_item(
                     title=episode.title,
-                    link=f"{root_url}/episodes/{episode.episode_number}",
+                    link=f"{root_url}/episodes/{episode_padded}",
                     description=str(episode.description),
                     pubdate=episode.publication_date,
                     unique_id=(
@@ -223,7 +228,7 @@ class PodcastFeedView(View):
                         else f"itm-ep{episode.episode_number}"
                     ),
                     enclosure={
-                        "url": f"{root_url}/media/episodes/{episode.episode_number}.mp3",
+                        "url": f"{root_url}/media/episodes/{episode_padded}.mp3",
                         "length": file_size,
                         "mime_type": "audio/mpeg",
                     },
@@ -236,7 +241,7 @@ class PodcastFeedView(View):
                         "season": str(episode.season_number),
                     },
                     # Add custom field for episode ID
-                    custom_fields={"epid": str(episode.episode_number)},
+                    custom_fields={"epid": episode_padded},
                 )
 
             # Generate and return the feed
