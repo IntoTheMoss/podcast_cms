@@ -56,7 +56,7 @@ class PodcastFeed(Rss201rev2Feed):
         handler.addQuickElement(
             "itunes:image",
             "",
-            {"href": "https://intothemoss.com/images/intothemoss.jpg"},
+            {"href": "https://intothemoss.com/media/original_images/intothemoss.jpg"},
         )
 
         # Other iTunes tags
@@ -200,11 +200,9 @@ class PodcastFeedView(View):
 
                 # Get the episode cover image URL - use production URL with zero-padded episode number
                 if episode.cover_image:
-                    image_url = (
-                        f"{root_url}/assets/images/jpg/1400/{episode_padded}.jpg"
-                    )
+                    image_url = f"{root_url}/media/original_images/{episode_padded}.jpg"
                 else:
-                    image_url = f"{root_url}/images/intothemoss.jpg"
+                    image_url = f"{root_url}/media/original_images/intothemoss.jpg"
 
                 # Generate an estimated file size if we can't get the actual size
                 try:
