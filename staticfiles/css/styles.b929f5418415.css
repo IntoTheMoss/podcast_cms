@@ -2,8 +2,8 @@
 
 @font-face {
   font-family: "charming_smile";
-  src: url("../fonts/charming-smile-demo.regular-webfont.woff2") format("woff2"),
-    url("../fonts/charming-smile-demo.regular-webfont.woff") format("woff");
+  src: url("../fonts/charming-smile-demo.regular-webfont.f6934ee52f3a.woff2") format("woff2"),
+    url("../fonts/charming-smile-demo.regular-webfont.5e5af95f23c6.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -166,7 +166,7 @@ article .info {
   max-width: 80%;
 }
 .episode-text {
-  display: block;
+  display: none;
   white-space: pre-wrap;
   padding: 0 2rem 2rem;
   max-width: 700px;
