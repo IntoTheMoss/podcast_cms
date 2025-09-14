@@ -12,6 +12,10 @@ from wagtail.models import Site
 class PodcastFeed(Rss201rev2Feed):
     """Extended RSS feed generator for podcasts."""
 
+    def __init__(self, *args, **kwargs):
+        self.has_explicit_episodes = kwargs.pop('has_explicit_episodes', False)
+        super().__init__(*args, **kwargs)
+
     def root_attributes(self):
         attrs = super().root_attributes()
         attrs["xmlns:itunes"] = "http://www.itunes.com/dtds/podcast-1.0.dtd"
@@ -59,8 +63,8 @@ class PodcastFeed(Rss201rev2Feed):
             {"href": "https://intothemoss.com/media/original_images/intothemoss.jpg"},
         )
 
-        # Other iTunes tags
-        handler.addQuickElement("itunes:explicit", "false")
+        # Other iTunes tags - set explicit based on whether any episodes are explicit
+        handler.addQuickElement("itunes:explicit", "true" if self.has_explicit_episodes else "false")
 
         # Atom link
         handler.addQuickElement(
@@ -149,6 +153,14 @@ class PodcastFeedView(View):
             # Use production URL for the feed regardless of environment
             root_url = "https://intothemoss.com"
 
+            # Get episodes first to check for explicit content
+            episodes = (
+                PodcastEpisodePage.objects.live().public().order_by("-publication_date")
+            )
+
+            # Check if any episodes are explicit to set the show-level explicit flag
+            has_explicit_episodes = episodes.filter(explicit_content=True).exists()
+
             # Basic feed setup
             feed = PodcastFeed(
                 title="Into the Moss",
@@ -158,11 +170,7 @@ class PodcastFeedView(View):
                 author_name="Into the Moss",
                 feed_url=f"{root_url}/feed.xml",
                 copyright="© Into the Moss 2025",
-            )
-
-            # Add episodes to the feed
-            episodes = (
-                PodcastEpisodePage.objects.live().public().order_by("-publication_date")
+                has_explicit_episodes=has_explicit_episodes,
             )
 
             for episode in episodes:
@@ -234,7 +242,7 @@ class PodcastFeedView(View):
                         "duration": duration,
                         "summary": str(episode.description),
                         "image": image_url,
-                        "explicit": "false",
+                        "explicit": "true" if episode.explicit_content else "false",
                         "episode": str(episode.season_episode_number),
                         "season": str(episode.season_number),
                     },
