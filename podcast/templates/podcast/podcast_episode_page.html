@@ -24,6 +24,11 @@
 </div>
 {% endif %}
 
+<!-- Back to top button -->
+<button id="back-to-top" class="back-to-top" aria-label="Back to top">
+  <span>^</span>
+</button>
+
 {% block wagtailuserbar %}
     {% wagtailuserbar %}
 {% endblock wagtailuserbar %}
@@ -39,42 +44,47 @@
     
     // Show/hide back to top button based on scroll position
     function toggleBackToTopButton() {
-      if (window.scrollY > 300) {
+      if (backToTopButton && window.scrollY > 300) {
         backToTopButton.classList.add('visible');
-      } else {
+      } else if (backToTopButton) {
         backToTopButton.classList.remove('visible');
       }
     }
     
-    // Listen for scroll events
-    window.addEventListener('scroll', toggleBackToTopButton);
-    
-    // Back to top button click handler
-    backToTopButton.addEventListener('click', function() {
-      window.scrollTo({ 
-        top: 0,
-        behavior: 'smooth'
+    // Only add scroll listener if back to top button exists
+    if (backToTopButton) {
+      // Listen for scroll events
+      window.addEventListener('scroll', toggleBackToTopButton);
+      
+      // Back to top button click handler
+      backToTopButton.addEventListener('click', function() {
+        window.scrollTo({ 
+          top: 0,
+          behavior: 'smooth'
+        });
       });
-    });
+      
+      // Initial check for back to top button visibility
+      toggleBackToTopButton();
+    }
 
     {% if page.transcript %}
     // Transcript scroll functionality
     const transcriptScroll = document.getElementById('transcript-scroll');
     const transcript = document.getElementById('episode-transcript');
     
-    transcriptScroll.addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      // Smooth scroll to transcript
-      transcript.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+    if (transcriptScroll && transcript) {
+      transcriptScroll.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Smooth scroll to transcript
+        transcript.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
       });
-    });
+    }
     {% endif %}
-    
-    // Initial check for back to top button visibility
-    toggleBackToTopButton();
   });
 </script>
 {% endblock %}
