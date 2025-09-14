@@ -12,7 +12,7 @@
         <audio controls src="{{ page.audio_file.url }}"></audio>
         <p>{{ page.description|richtext }}</p>
         <p>First broadcast on <a href="https://resonancefm.com" target="_blank">Resonance 104.4 FM</a>, {{ page.publication_date|date:"d M Y" }}.</p>
-        <p><a href="/">← All episodes</a> {% if page.transcript %}&nbsp; <a class="expander" id="transcript-toggle">Transcript ↓</a>{% endif %}</p>
+        <p><a href="/">← All episodes</a> {% if page.transcript %}&nbsp; <a href="#episode-transcript" id="transcript-scroll">Transcript ↓</a>{% endif %}</p>
       </div>
     </div>
   </div>
@@ -31,26 +31,51 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if page.transcript %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const transcriptToggle = document.getElementById('transcript-toggle');
+    // Back to top button functionality
+    const backToTopButton = document.getElementById('back-to-top');
+    const episodePlayer = document.getElementById('episode-player');
+    
+    // Show/hide back to top button based on scroll position
+    function toggleBackToTopButton() {
+      if (window.scrollY > 300) {
+        backToTopButton.classList.add('visible');
+      } else {
+        backToTopButton.classList.remove('visible');
+      }
+    }
+    
+    // Listen for scroll events
+    window.addEventListener('scroll', toggleBackToTopButton);
+    
+    // Back to top button click handler
+    backToTopButton.addEventListener('click', function() {
+      window.scrollTo({ 
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    {% if page.transcript %}
+    // Transcript scroll functionality
+    const transcriptScroll = document.getElementById('transcript-scroll');
     const transcript = document.getElementById('episode-transcript');
     
-    transcriptToggle.addEventListener('click', function() {
-      if (transcript.style.display === 'block') {
-        transcript.style.display = 'none';
-        transcriptToggle.textContent = 'Transcript ↓';
-        // TODO:
-        //window.scrollIntoView(transcript);
-        transcript.scrollIntoView();
-      } else {
-        transcript.style.display = 'block';
-        transcriptToggle.textContent = 'Transcript ↑';
-      }
+    transcriptScroll.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Smooth scroll to transcript
+      transcript.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     });
+    {% endif %}
+    
+    // Initial check for back to top button visibility
+    toggleBackToTopButton();
   });
 </script>
-{% endif %}
 {% endblock %}
 
