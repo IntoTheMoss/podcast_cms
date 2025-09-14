@@ -1,11 +1,50 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel
 from wagtail.search import index
 from modelcluster.fields import ParentalKey
 from django.utils.functional import cached_property
+import os
+
+
+def validate_mp3_file(value):
+    """Validate that the uploaded file is an MP3."""
+    if not value:
+        return
+    
+    # Check file extension
+    ext = os.path.splitext(value.name)[1].lower()
+    if ext != '.mp3':
+        raise ValidationError('Only MP3 files are allowed.')
+    
+    # Check MIME type if available
+    if hasattr(value, 'content_type'):
+        if value.content_type and not value.content_type.startswith('audio/'):
+            raise ValidationError('File must be an audio file.')
+    
+    # Optional: Check file signature (magic bytes) for MP3
+    if hasattr(value, 'read'):
+        # Save current position
+        current_pos = value.tell() if hasattr(value, 'tell') else 0
+        value.seek(0)
+        
+        # Read first few bytes to check MP3 signature
+        header = value.read(3)
+        if header and len(header) >= 3:
+            # MP3 files typically start with ID3 tag or MP3 frame sync
+            if not (header[:3] == b'ID3' or 
+                   (len(header) >= 2 and header[0] == 0xFF and (header[1] & 0xE0) == 0xE0)):
+                # Reset position and raise error
+                if hasattr(value, 'seek'):
+                    value.seek(current_pos)
+                raise ValidationError('File does not appear to be a valid MP3.')
+        
+        # Reset file position
+        if hasattr(value, 'seek'):
+            value.seek(current_pos)
 
 
 class PodcastIndexPage(Page):
@@ -60,7 +99,11 @@ class PodcastEpisodePage(Page):
         related_name="+",
         help_text="Episode cover image (1400x1400px recommended)",
     )
-    audio_file = models.FileField(upload_to="episodes/", help_text="MP3 audio file")
+    audio_file = models.FileField(
+        upload_to="episodes/", 
+        help_text="MP3 audio file",
+        validators=[validate_mp3_file]
+    )
     duration_in_seconds = models.PositiveIntegerField(
         blank=True,
         null=True,
