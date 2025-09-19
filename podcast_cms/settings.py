@@ -21,9 +21,9 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default=get_random_secret_key())
 DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = [
-    f"dev.{env('SITE_HOST')}",
-    f"{env('SITE_HOST')}",
-    f"www.{env('SITE_HOST')}",
+    f"dev.{env('PODCAST_DOMAIN')}",
+    f"{env('PODCAST_DOMAIN')}",
+    f"www.{env('PODCAST_DOMAIN')}",
     "localhost",
     "127.0.0.1",
 ]
@@ -140,7 +140,7 @@ if env("SPACES_KEY", default=None):
     # Settings for DigitalOcean Spaces
     AWS_ACCESS_KEY_ID = env("SPACES_KEY")
     AWS_SECRET_ACCESS_KEY = env("SPACES_SECRET")
-    AWS_STORAGE_BUCKET_NAME = env("SPACES_BUCKET", default="intothemoss-media")
+    AWS_STORAGE_BUCKET_NAME = env("SPACES_BUCKET")
     AWS_S3_ENDPOINT_URL = (
         f"https://{env('SPACES_REGION', default='fra1')}.digitaloceanspaces.com"
     )
@@ -182,6 +182,29 @@ WAGTAILSEARCH_BACKENDS = {
 # Base URL for Wagtail admin
 WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL", default="http://localhost:8000")
 
+# Podcast configuration
+PODCAST_TITLE = env("PODCAST_TITLE", default="Your Podcast")
+PODCAST_SUBTITLE = env(
+    "PODCAST_SUBTITLE",
+    default="A sunken raft of weeds woven into a verdant morass of sound, song and story",
+)
+PODCAST_SUMMARY = env(
+    "PODCAST_SUMMARY",
+    default="Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns",
+)
+PODCAST_DESCRIPTION = env(
+    "PODCAST_DESCRIPTION",
+    default="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Friday, Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns.",
+)
+PODCAST_AUTHOR = env("PODCAST_AUTHOR", default="Your Name")
+PODCAST_OWNER_NAME = env("PODCAST_OWNER_NAME", default="Your Name")
+PODCAST_EMAIL = env("PODCAST_EMAIL", default="your@email.com")
+PODCAST_DOMAIN = env("PODCAST_DOMAIN", default="yoursite.com")
+PODCAST_COVER_IMAGE = env(
+    "PODCAST_COVER_IMAGE", default="/media/original_images/cover.jpg"
+)
+PODCAST_COPYRIGHT = env("PODCAST_COPYRIGHT", default="© Your Podcast 2025")
+
 # Allowed file extensions for documents in the document library
 WAGTAILDOCS_EXTENSIONS = [
     "csv",
@@ -201,8 +224,8 @@ if not DEBUG:
     CSRF_TRUSTED_ORIGINS = env.list(
         "CSRF_TRUSTED_ORIGINS",
         default=[
-            f"https://{env('SITE_HOST')}",
-            f"https://www.{env('SITE_HOST')}",
+            f"https://{env('PODCAST_DOMAIN')}",
+            f"https://www.{env('PODCAST_DOMAIN')}",
         ],
     )
     SESSION_COOKIE_SECURE = True

@@ -1,5 +1,6 @@
 import os
 import traceback
+from django.conf import settings
 from django.http import HttpResponse
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.generic import View
@@ -28,12 +29,12 @@ class PodcastFeed(Rss201rev2Feed):
         # Basic podcast information
         handler.addQuickElement(
             "itunes:subtitle",
-            "A sunken raft of weeds woven into a verdant morass of sound, song and story",
+            settings.PODCAST_SUBTITLE,
         )
-        handler.addQuickElement("itunes:author", "Into the Moss")
+        handler.addQuickElement("itunes:author", settings.PODCAST_AUTHOR)
         handler.addQuickElement(
             "itunes:summary",
-            "Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns, broadcast on London's Resonance 104.4 FM",
+            settings.PODCAST_SUMMARY,
         )
 
         # Category information - match the original structure
@@ -50,16 +51,16 @@ class PodcastFeed(Rss201rev2Feed):
         # Owner information
         handler.startElement("itunes:owner", {})
         handler.addQuickElement(
-            "itunes:name", "James Baxter, James Ferris, Ben Polhill"
+            "itunes:name", settings.PODCAST_OWNER_NAME
         )
-        handler.addQuickElement("itunes:email", "intothemossradio@gmail.com")
+        handler.addQuickElement("itunes:email", settings.PODCAST_EMAIL)
         handler.endElement("itunes:owner")
 
         # Cover image
         handler.addQuickElement(
             "itunes:image",
             "",
-            {"href": "https://intothemoss.com/media/original_images/intothemoss.jpg"},
+            {"href": f"https://{settings.PODCAST_DOMAIN}{settings.PODCAST_COVER_IMAGE}"},
         )
 
         # Other iTunes tags - set explicit based on whether any episodes are explicit
@@ -72,7 +73,7 @@ class PodcastFeed(Rss201rev2Feed):
             "atom:link",
             "",
             {
-                "href": "https://intothemoss.com/feed.xml",
+                "href": f"https://{settings.PODCAST_DOMAIN}/feed.xml",
                 "rel": "self",
                 "type": "application/rss+xml",
             },
@@ -152,7 +153,7 @@ class PodcastFeedView(View):
                 )
 
             # Use production URL for the feed regardless of environment
-            root_url = "https://intothemoss.com"
+            root_url = f"https://{settings.PODCAST_DOMAIN}"
 
             # Get episodes first to check for explicit content
             episodes = (
@@ -164,13 +165,13 @@ class PodcastFeedView(View):
 
             # Basic feed setup
             feed = PodcastFeed(
-                title="Into the Moss",
+                title=settings.PODCAST_TITLE,
                 link=root_url,
-                description="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Friday, Into the Moss is a 14 minute drift through original music, soundscapes and liminal yarns.",
+                description=settings.PODCAST_DESCRIPTION,
                 language="en-uk",
-                author_name="Into the Moss",
+                author_name=settings.PODCAST_AUTHOR,
                 feed_url=f"{root_url}/feed.xml",
-                copyright="© Into the Moss 2025",
+                copyright=settings.PODCAST_COPYRIGHT,
                 has_explicit_episodes=has_explicit_episodes,
             )
 
@@ -211,7 +212,7 @@ class PodcastFeedView(View):
                 if episode.cover_image:
                     image_url = f"{root_url}/media/original_images/{episode_padded}.jpg"
                 else:
-                    image_url = f"{root_url}/media/original_images/intothemoss.jpg"
+                    image_url = f"{root_url}{settings.PODCAST_COVER_IMAGE}"
 
                 # Generate an estimated file size if we can't get the actual size
                 try:
