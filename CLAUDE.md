@@ -48,7 +48,7 @@ This is a Django/Wagtail CMS for managing the "Into the Moss" podcast. The proje
 
 ### Key Applications
 
-**`intothemoss_cms/`** - Main Django project configuration
+**`podcast_cms/`** - Main Django project configuration
 - `settings.py` - Configured for both development (SQLite) and production (PostgreSQL via DATABASE_URL)
 - Uses django-environ for environment variable management
 - Supports DigitalOcean Spaces for media storage in production

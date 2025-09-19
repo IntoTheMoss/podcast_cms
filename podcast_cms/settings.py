@@ -21,9 +21,9 @@ SECRET_KEY = env("DJANGO_SECRET_KEY", default=get_random_secret_key())
 DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = [
-    "dev.intothemoss.com",
-    "intothemoss.com",
-    "www.intothemoss.com",
+    f"dev.{env('SITE_HOST')}",
+    f"{env('SITE_HOST')}",
+    f"www.{env('SITE_HOST')}",
     "localhost",
     "127.0.0.1",
 ]
@@ -65,13 +65,13 @@ MIDDLEWARE = [
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 ]
 
-ROOT_URLCONF = "intothemoss_cms.urls"
+ROOT_URLCONF = "podcast_cms.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "intothemoss_cms", "templates"),
+            os.path.join(BASE_DIR, "podcast_cms", "templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -85,7 +85,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "intothemoss_cms.wsgi.application"
+WSGI_APPLICATION = "podcast_cms.wsgi.application"
 
 
 # Database
@@ -129,7 +129,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "intothemoss_cms", "static"),
+    os.path.join(BASE_DIR, "podcast_cms", "static"),
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
@@ -170,7 +170,7 @@ STORAGES = {
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
 # Wagtail settings
-WAGTAIL_SITE_NAME = "Into the Moss"
+WAGTAIL_SITE_NAME = env("SITE_NAME", default="Podcast CMS")
 
 # Search backend
 WAGTAILSEARCH_BACKENDS = {
@@ -201,9 +201,8 @@ if not DEBUG:
     CSRF_TRUSTED_ORIGINS = env.list(
         "CSRF_TRUSTED_ORIGINS",
         default=[
-            "https://dev.intothemoss.com",
-            "https://intothemoss.com",
-            "https://www.intothemoss.com",
+            f"https://{env('SITE_HOST')}",
+            f"https://www.{env('SITE_HOST')}",
         ],
     )
     SESSION_COOKIE_SECURE = True

@@ -123,7 +123,7 @@ The deployment script handles:
 
 ```
 podcast_cms/
-├── intothemoss_cms/          # Django project configuration
+├── podcast_cms/          # Django project configuration
 │   ├── settings.py           # Environment-based configuration
 │   └── templates/            # Base templates
 ├── podcast/                  # Main podcast app

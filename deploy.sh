@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Set up environment variables
-export DJANGO_SETTINGS_MODULE=intothemoss_cms.settings
-export PYTHONPATH=/var/www/intothemoss_cms
+export DJANGO_SETTINGS_MODULE=podcast_cms.settings
+export PYTHONPATH=/var/www/podcast_cms
 
 # Go to the project directory
-cd /var/www/intothemoss_cms
+cd /var/www/podcast_cms
 
 echo "Starting deployment..."
 

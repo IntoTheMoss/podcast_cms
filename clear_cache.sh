@@ -16,7 +16,7 @@ sudo systemctl restart nginx
 
 # Force Django to regenerate static file manifests
 echo "Regenerating Django static file manifests..."
-cd /var/www/intothemoss_cms
+cd /var/www/podcast_cms
 source venv/bin/activate
 python manage.py collectstatic --noinput --clear
 

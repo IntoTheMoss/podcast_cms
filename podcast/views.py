@@ -1,6 +1,5 @@
 import os
 import traceback
-from datetime import datetime
 from django.http import HttpResponse
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.generic import View
@@ -13,7 +12,7 @@ class PodcastFeed(Rss201rev2Feed):
     """Extended RSS feed generator for podcasts."""
 
     def __init__(self, *args, **kwargs):
-        self.has_explicit_episodes = kwargs.pop('has_explicit_episodes', False)
+        self.has_explicit_episodes = kwargs.pop("has_explicit_episodes", False)
         super().__init__(*args, **kwargs)
 
     def root_attributes(self):
@@ -64,7 +63,9 @@ class PodcastFeed(Rss201rev2Feed):
         )
 
         # Other iTunes tags - set explicit based on whether any episodes are explicit
-        handler.addQuickElement("itunes:explicit", "true" if self.has_explicit_episodes else "false")
+        handler.addQuickElement(
+            "itunes:explicit", "true" if self.has_explicit_episodes else "false"
+        )
 
         # Atom link
         handler.addQuickElement(
