@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.generic import View
 from django.urls import reverse
-from podcast.models import PodcastEpisodePage
+from podcast.models import PodcastEpisodePage, PodcastSettings
 from wagtail.models import Site
 
 
@@ -14,6 +14,7 @@ class PodcastFeed(Rss201rev2Feed):
 
     def __init__(self, *args, **kwargs):
         self.has_explicit_episodes = kwargs.pop("has_explicit_episodes", False)
+        self.podcast_settings = kwargs.pop("podcast_settings", None)
         super().__init__(*args, **kwargs)
 
     def root_attributes(self):
@@ -29,12 +30,12 @@ class PodcastFeed(Rss201rev2Feed):
         # Basic podcast information
         handler.addQuickElement(
             "itunes:subtitle",
-            settings.PODCAST_SUBTITLE,
+            self.podcast_settings.subtitle,
         )
-        handler.addQuickElement("itunes:author", settings.PODCAST_AUTHOR)
+        handler.addQuickElement("itunes:author", self.podcast_settings.author)
         handler.addQuickElement(
             "itunes:summary",
-            settings.PODCAST_SUMMARY,
+            self.podcast_settings.summary,
         )
 
         # Category information - match the original structure
@@ -51,16 +52,20 @@ class PodcastFeed(Rss201rev2Feed):
         # Owner information
         handler.startElement("itunes:owner", {})
         handler.addQuickElement(
-            "itunes:name", settings.PODCAST_OWNER_NAME
+            "itunes:name", self.podcast_settings.owner_name
         )
-        handler.addQuickElement("itunes:email", settings.PODCAST_EMAIL)
+        handler.addQuickElement("itunes:email", self.podcast_settings.email)
         handler.endElement("itunes:owner")
 
         # Cover image
+        if self.podcast_settings.cover_image:
+            cover_url = f"https://{settings.PODCAST_DOMAIN}{self.podcast_settings.cover_image.file.url}"
+        else:
+            cover_url = f"https://{settings.PODCAST_DOMAIN}/media/original_images/cover.jpg"
         handler.addQuickElement(
             "itunes:image",
             "",
-            {"href": f"https://{settings.PODCAST_DOMAIN}{settings.PODCAST_COVER_IMAGE}"},
+            {"href": cover_url},
         )
 
         # Other iTunes tags - set explicit based on whether any episodes are explicit
@@ -160,19 +165,23 @@ class PodcastFeedView(View):
                 PodcastEpisodePage.objects.live().public().order_by("-publication_date")
             )
 
+            # Get podcast settings from CMS
+            podcast_settings = PodcastSettings.for_site(site)
+
             # Check if any episodes are explicit to set the show-level explicit flag
             has_explicit_episodes = episodes.filter(explicit_content=True).exists()
 
             # Basic feed setup
             feed = PodcastFeed(
-                title=settings.PODCAST_TITLE,
+                title=podcast_settings.title,
                 link=root_url,
-                description=settings.PODCAST_DESCRIPTION,
-                language="en-uk",
-                author_name=settings.PODCAST_AUTHOR,
+                description=podcast_settings.description,
+                language=podcast_settings.language,
+                author_name=podcast_settings.author,
                 feed_url=f"{root_url}/feed.xml",
-                copyright=settings.PODCAST_COPYRIGHT,
+                copyright=podcast_settings.copyright_notice,
                 has_explicit_episodes=has_explicit_episodes,
+                podcast_settings=podcast_settings,
             )
 
             for episode in episodes:
@@ -212,7 +221,11 @@ class PodcastFeedView(View):
                 if episode.cover_image:
                     image_url = f"{root_url}/media/original_images/{episode_padded}.jpg"
                 else:
-                    image_url = f"{root_url}{settings.PODCAST_COVER_IMAGE}"
+                    # Fall back to podcast main cover image
+                    if podcast_settings.cover_image:
+                        image_url = f"{root_url}{podcast_settings.cover_image.file.url}"
+                    else:
+                        image_url = f"{root_url}/media/original_images/cover.jpg"
 
                 # Generate an estimated file size if we can't get the actual size
                 try:

@@ -5,6 +5,7 @@ from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel
 from wagtail.search import index
+from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from modelcluster.fields import ParentalKey
 from django.utils.functional import cached_property
 import os
@@ -197,3 +198,93 @@ class PodcastLink(Orderable):
         FieldPanel("title"),
         FieldPanel("url"),
     ]
+
+
+@register_setting
+class PodcastSettings(BaseSiteSetting):
+    """Site-wide podcast settings that can be managed through the CMS."""
+
+    title = models.CharField(
+        max_length=255,
+        default="Your Podcast",
+        help_text="The name of your podcast"
+    )
+
+    subtitle = models.CharField(
+        max_length=255,
+        default="A sunken raft of weeds woven into a verdant morass of sound, song and story",
+        help_text="Short description for podcast directories"
+    )
+
+    summary = models.TextField(
+        default="Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns",
+        help_text="Summary description for iTunes"
+    )
+
+    description = models.TextField(
+        default="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Friday, Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns.",
+        help_text="Full description for RSS feed"
+    )
+
+    author = models.CharField(
+        max_length=255,
+        default="Your Name",
+        help_text="Author/creator name for the podcast"
+    )
+
+    owner_name = models.CharField(
+        max_length=255,
+        default="Your Name",
+        help_text="Owner name for iTunes (can be multiple people)"
+    )
+
+    email = models.EmailField(
+        default="your@email.com",
+        help_text="Contact email for the podcast"
+    )
+
+    cover_image = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Main podcast cover image (1400x1400px recommended)"
+    )
+
+    copyright_notice = models.CharField(
+        max_length=255,
+        default="© Your Podcast 2025",
+        help_text="Copyright notice for the podcast"
+    )
+
+    language = models.CharField(
+        max_length=10,
+        default="en-uk",
+        help_text="Language code for the podcast (e.g. en-uk, en-us)"
+    )
+
+    panels = [
+        MultiFieldPanel([
+            FieldPanel("title"),
+            FieldPanel("subtitle"),
+            FieldPanel("author"),
+        ], heading="Basic Information"),
+
+        MultiFieldPanel([
+            FieldPanel("summary"),
+            FieldPanel("description"),
+        ], heading="Descriptions"),
+
+        MultiFieldPanel([
+            FieldPanel("owner_name"),
+            FieldPanel("email"),
+            FieldPanel("copyright_notice"),
+            FieldPanel("language"),
+        ], heading="Contact & Legal"),
+
+        FieldPanel("cover_image"),
+    ]
+
+    class Meta:
+        verbose_name = "Podcast Settings"

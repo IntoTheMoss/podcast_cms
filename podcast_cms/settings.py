@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "search",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
+    "wagtail.contrib.settings",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -182,28 +183,8 @@ WAGTAILSEARCH_BACKENDS = {
 # Base URL for Wagtail admin
 WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL", default="http://localhost:8000")
 
-# Podcast configuration
-PODCAST_TITLE = env("PODCAST_TITLE", default="Your Podcast")
-PODCAST_SUBTITLE = env(
-    "PODCAST_SUBTITLE",
-    default="A sunken raft of weeds woven into a verdant morass of sound, song and story",
-)
-PODCAST_SUMMARY = env(
-    "PODCAST_SUMMARY",
-    default="Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns",
-)
-PODCAST_DESCRIPTION = env(
-    "PODCAST_DESCRIPTION",
-    default="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Friday, Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns.",
-)
-PODCAST_AUTHOR = env("PODCAST_AUTHOR", default="Your Name")
-PODCAST_OWNER_NAME = env("PODCAST_OWNER_NAME", default="Your Name")
-PODCAST_EMAIL = env("PODCAST_EMAIL", default="your@email.com")
+# Podcast technical configuration
 PODCAST_DOMAIN = env("PODCAST_DOMAIN", default="yoursite.com")
-PODCAST_COVER_IMAGE = env(
-    "PODCAST_COVER_IMAGE", default="/media/original_images/cover.jpg"
-)
-PODCAST_COPYRIGHT = env("PODCAST_COPYRIGHT", default="© Your Podcast 2025")
 
 # Allowed file extensions for documents in the document library
 WAGTAILDOCS_EXTENSIONS = [
