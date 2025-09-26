@@ -173,6 +173,42 @@ article .info {
   margin: 0 auto;
 }
 
+/* Random episode button */
+.random-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+  text-decoration: none;
+}
+
+.random-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  color: #f5f5f5;
+}
+
+.random-button:active {
+  transform: translateY(0);
+}
+
+.random-button svg {
+  width: 24px;
+  height: 24px;
+}
+
 /* Back to top button */
 .back-to-top {
   position: fixed;
@@ -234,6 +270,19 @@ article .info {
     padding: 2rem;
   }
   
+  /* Adjust random button for mobile */
+  .random-button {
+    top: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .random-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
   /* Adjust back to top button for mobile */
   .back-to-top {
     bottom: 15px;
