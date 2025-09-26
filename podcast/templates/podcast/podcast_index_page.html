@@ -3,6 +3,11 @@
 {% block title %}Into the Moss{% endblock %} 
 {% block main_class %}home{%endblock %}
 {% block content %}
+<a href="{% url 'random_episode' %}" class="random-button" title="Listen to a random episode">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+    <path d="M10.59,9.17L5.41,4L4,5.41L9.17,10.58L10.59,9.17M14.5,4L16.54,6.04L4,18.59L5.41,20L17.96,7.46L20,9.5V4M10.41,14.83L15.59,20L17,18.59L11.83,13.42L10.41,14.83Z"/>
+  </svg>
+</a>
 <div class="logo">
   <svg
     viewBox="0 0 210 297"

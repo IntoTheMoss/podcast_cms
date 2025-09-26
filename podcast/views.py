@@ -1,7 +1,8 @@
 import os
 import traceback
+import random
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.generic import View
 from django.urls import reverse
@@ -286,3 +287,17 @@ class PodcastFeedView(View):
         except Exception as e:
             error_message = f"Error generating feed: {str(e)}\n{traceback.format_exc()}"
             return HttpResponse(error_message, content_type="text/plain", status=500)
+
+
+def random_episode(request):
+    """View that redirects to a random episode."""
+    episodes = PodcastEpisodePage.objects.live().public()
+
+    if episodes.exists():
+        random_episode = random.choice(episodes)
+        return HttpResponseRedirect(random_episode.url)
+    else:
+        # If no episodes exist, redirect to homepage
+        from home.models import HomePage
+        homepage = HomePage.objects.live().first()
+        return HttpResponseRedirect(homepage.url if homepage else '/')
