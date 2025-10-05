@@ -25,6 +25,8 @@ body {
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.4);
   transition: background-color cubic-bezier(0.4, 0, 0.2, 1) 0.6s;
+  z-index: 1000;
+  pointer-events: none;
 }
 .logo svg {
   height: 100%;
@@ -44,6 +46,7 @@ body {
 }
 .id {
   position: absolute;
+  z-index: 10;
 }
 nav {
   text-align: center;
@@ -100,8 +103,29 @@ h4 {
 }
 main.home {
   width: 100vw;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-gap: 0;
+  grid-auto-rows: 1fr;
+}
+
+/* Responsive grid breakpoints */
+@media (min-width: 480px) {
+  main.home {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 800px) {
+  main.home {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  main.home {
+    grid-template-columns: repeat(8, 1fr);
+  }
 }
 audio {
   width: 100%;
@@ -117,22 +141,36 @@ article .episode-player-image {
   padding: 1rem 1rem 1rem 0;
 }
 .episode-player-image {
-  flex: 1 0 auto;
+  aspect-ratio: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 .episode-player-image a {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
+  width: 100%;
 }
 .episode-player-image picture {
-  flex: 1 0 auto;
+  width: 100%;
   height: 100%;
 }
 .episode-player-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  background: #1a1b1f;
+  transition: opacity 0.3s ease-in-out;
+}
+.episode-player-image img.placeholder {
+  filter: blur(5px);
+  transform: scale(1.1);
+}
+.episode-player-image img.loaded {
+  filter: none;
+  transform: scale(1);
 }
 article .info {
   flex-direction: column;

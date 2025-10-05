@@ -100,18 +100,18 @@
 <div class="episode-player-image">
   <a href="{% pageurl episode %}">
     <p class="id">{{ episode.episode_number }}</p>
-    <picture>
-      {% if episode.cover_image %} {% image episode.cover_image fill-150x150 format-webp as webp_image %} {% image episode.cover_image fill-150x150 as jpg_image %}
-      <source srcset="{{ webp_image.url }}" type="image/webp" />
-      <img src="{{ jpg_image.url }}" loading="lazy" alt="{{ episode.title }}" />
-      {% else %}
+    {% if episode.cover_image %}
+      {% image episode.cover_image fill-20x20 as placeholder_image %}
+      {% picture episode.cover_image fill-150x150 loading="lazy" class="placeholder" data-placeholder="{{ placeholder_image.url }}" %}
+    {% else %}
       <img
         src="{% static 'images/default-cover.jpg' %}"
         loading="lazy"
         alt="{{ episode.title }}"
+        width="150"
+        height="150"
       />
-      {% endif %}
-    </picture>
+    {% endif %}
   </a>
 </div>
 {% endfor %}
