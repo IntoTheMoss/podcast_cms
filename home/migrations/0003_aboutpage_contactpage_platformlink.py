@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('home', '0002_create_homepage'),
-        ('wagtailcore', '0094_alter_page_locale'),
+        ('wagtailcore', '0083_workflowcontenttype'),
     ]
 
     operations = [

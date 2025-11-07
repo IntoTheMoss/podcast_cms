@@ -8,8 +8,8 @@ from datetime import date
 class Migration(migrations.Migration):
     dependencies = [
         ("podcast", "0003_alter_podcastepisodepage_audio_file"),
-        ("wagtailcore", "0095_groupsitepermission"),
-        ("wagtailimages", "0027_image_description"),
+        ("wagtailcore", "0083_workflowcontenttype"),
+        ("wagtailimages", "0025_alter_image_file_alter_rendition_file"),
     ]
 
     operations = [

@@ -172,6 +172,10 @@ class PodcastEpisodePage(Page):
         if not self.title or self.title == f"Episode {self.episode_number}":
             self.title = f"Episode {self.episode_number}"
 
+        # Sync go_live_at with publication_date for scheduled publishing
+        if self.publication_date:
+            self.go_live_at = self.publication_date
+
         # Try to detect audio duration if not set (requires mutagen)
         if not self.duration_in_seconds and self.audio_file:
             try:
@@ -206,23 +210,23 @@ class PodcastSettings(BaseSiteSetting):
 
     title = models.CharField(
         max_length=255,
-        default="Your Podcast",
+        default="Your Podcast Name",
         help_text="The name of your podcast"
     )
 
     subtitle = models.CharField(
         max_length=255,
-        default="A sunken raft of weeds woven into a verdant morass of sound, song and story",
+        default="A brief tagline for your podcast",
         help_text="Short description for podcast directories"
     )
 
     summary = models.TextField(
-        default="Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns",
+        default="A short summary of what your podcast is about",
         help_text="Summary description for iTunes"
     )
 
     description = models.TextField(
-        default="A sunken raft of weeds woven into a verdant morass of sound, song and story. Broadcast on London's Resonance FM every Friday, Your podcast is a 14 minute drift through original music, soundscapes and liminal yarns.",
+        default="A full description of your podcast. Include what makes your podcast unique, who it's for, and what listeners can expect.",
         help_text="Full description for RSS feed"
     )
 
@@ -254,7 +258,7 @@ class PodcastSettings(BaseSiteSetting):
 
     copyright_notice = models.CharField(
         max_length=255,
-        default="© Your Podcast 2025",
+        default="© 2025 Your Podcast Name. All rights reserved.",
         help_text="Copyright notice for the podcast"
     )
 
