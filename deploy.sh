@@ -54,10 +54,6 @@ if ! sudo systemctl is-active --quiet gunicorn-intothemoss; then
     exit 1
 fi
 
-# Restart Apache
-echo "Restarting Apache..."
-sudo systemctl restart apache2
-
 # Reload Nginx
 sudo systemctl reload nginx
 
