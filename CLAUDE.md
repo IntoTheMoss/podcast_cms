@@ -102,7 +102,7 @@ Key environment variables:
 ### Dependencies
 
 The project uses modern Django/Wagtail versions with key dependencies:
-- Django 5.1.7 with Wagtail 6.4.1
+- Django 5.2.16 with Wagtail 7.4.2
 - mutagen for audio metadata extraction
 - Pillow for image processing
 - psycopg2-binary for PostgreSQL support
