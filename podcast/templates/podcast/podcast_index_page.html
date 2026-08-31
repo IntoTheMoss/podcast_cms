@@ -21,16 +21,17 @@
   </button>
   <div id="site-menu" class="site-menu" hidden>
     <div class="site-menu-section">
+      <a href="{% url 'random_episode' %}">Random episode</a>
+    </div>
+    <div class="site-menu-section">
       <p class="site-menu-heading">Subscribe</p>
       {% for link in platform_links %}
         <a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.title }}</a>
       {% endfor %}
-      <a href="{% url 'podcast_feed' %}">RSS / other apps</a>
-    </div>
-    <div class="site-menu-section">
-      <a href="{% url 'random_episode' %}">Random episode</a>
+      <button type="button" class="copy-feed-link" data-feed-url="{{ feed_url }}">RSS / other apps</button>
     </div>
   </div>
+  <div class="copy-toast" role="status" aria-live="polite" hidden>RSS link copied<br><small>Paste into your preferred app</small></div>
 </div>
 <div class="logo">
   <svg

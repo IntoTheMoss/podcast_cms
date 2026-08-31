@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
@@ -86,6 +87,7 @@ class PodcastIndexPage(Page):
         context["platform_links"] = (
             about_page.platform_links.all() if about_page else []
         )
+        context["feed_url"] = f"https://{settings.PODCAST_DOMAIN}/feed.xml"
         return context
 
     # Allow only podcast episode pages as children

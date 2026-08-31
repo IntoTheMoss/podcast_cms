@@ -137,6 +137,55 @@ function setupSiteMenu() {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeMenu();
   });
+
+  const copyFeedButton = document.querySelector('.copy-feed-link');
+  const toast = document.querySelector('.copy-toast');
+
+  function showToast() {
+    if (!toast) return;
+    toast.hidden = false;
+    clearTimeout(showToast._timeout);
+    showToast._timeout = setTimeout(() => {
+      toast.hidden = true;
+    }, 3000);
+  }
+
+  function copyTextFallback(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      console.info(`Couldn't copy feed URL: ${e}`);
+    }
+    document.body.removeChild(textarea);
+  }
+
+  if (copyFeedButton) {
+    copyFeedButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const feedUrl = copyFeedButton.dataset.feedUrl;
+
+      const done = () => {
+        closeMenu();
+        showToast();
+      };
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(feedUrl).then(done).catch(() => {
+          copyTextFallback(feedUrl);
+          done();
+        });
+      } else {
+        copyTextFallback(feedUrl);
+        done();
+      }
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', setupSiteMenu);
