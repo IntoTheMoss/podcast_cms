@@ -107,3 +107,36 @@ function loadHighResImage(img) {
 }
 
 document.addEventListener('DOMContentLoaded', setupProgressiveImageLoading);
+
+function setupSiteMenu() {
+  const button = document.querySelector('.menu-button');
+  const menu = document.getElementById('site-menu');
+  if (!button || !menu) return;
+
+  function closeMenu() {
+    menu.hidden = true;
+    button.setAttribute('aria-expanded', 'false');
+  }
+
+  function openMenu() {
+    menu.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+  }
+
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    menu.hidden ? openMenu() : closeMenu();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!menu.hidden && !menu.contains(event.target) && event.target !== button) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', setupSiteMenu);

@@ -74,10 +74,17 @@ class PodcastIndexPage(Page):
     ]
 
     def get_context(self, request):
+        from home.models import AboutPage
+
         context = super().get_context(request)
         # Add all published episodes, ordered by episode number
         context["episodes"] = PodcastEpisodePage.objects.live().order_by(
             "-episode_number"
+        )
+        # Platform links (Apple Podcasts, Spotify, etc.) for the subscribe menu
+        about_page = AboutPage.objects.live().first()
+        context["platform_links"] = (
+            about_page.platform_links.all() if about_page else []
         )
         return context
 

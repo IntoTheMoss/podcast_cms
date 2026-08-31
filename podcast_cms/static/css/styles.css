@@ -211,7 +211,91 @@ article .info {
   margin: 0 auto;
 }
 
-/* Random episode button */
+/* Site menu */
+.site-menu-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+}
+
+.menu-button {
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.menu-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  color: #f5f5f5;
+}
+
+.menu-button:active {
+  transform: translateY(0);
+}
+
+.menu-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.site-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: rgba(12, 13, 16, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 0.5rem 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.site-menu[hidden] {
+  display: none;
+}
+
+.site-menu-section {
+  padding: 0.5rem 0;
+}
+
+.site-menu-section + .site-menu-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.site-menu-heading {
+  margin: 0;
+  padding: 0 1.2rem 0.4rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(245, 245, 245, 0.5);
+}
+
+.site-menu a {
+  display: block;
+  padding: 0.5rem 1.2rem;
+  color: #f5f5f5;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.site-menu a:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Random episode button (episode pages) */
 .random-button {
   position: fixed;
   top: 20px;
@@ -243,6 +327,42 @@ article .info {
 }
 
 .random-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Back to all episodes button (episode pages) */
+.back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+  text-decoration: none;
+}
+
+.back-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  color: #f5f5f5;
+}
+
+.back-button:active {
+  transform: translateY(0);
+}
+
+.back-button svg {
   width: 24px;
   height: 24px;
 }
@@ -308,6 +428,22 @@ article .info {
     padding: 2rem;
   }
   
+  /* Adjust menu button for mobile */
+  .site-menu-wrapper {
+    top: 15px;
+    right: 15px;
+  }
+
+  .menu-button {
+    width: 45px;
+    height: 45px;
+  }
+
+  .menu-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
   /* Adjust random button for mobile */
   .random-button {
     top: 15px;
@@ -317,6 +453,19 @@ article .info {
   }
 
   .random-button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Adjust back button for mobile */
+  .back-button {
+    top: 15px;
+    left: 15px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .back-button svg {
     width: 20px;
     height: 20px;
   }
