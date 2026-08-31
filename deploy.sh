@@ -5,7 +5,7 @@ export DJANGO_SETTINGS_MODULE=podcast_cms.settings
 export PYTHONPATH=/var/www/podcast_cms
 
 # Go to the project directory
-cd /var/www/podcast_cms
+cd /var/www/intothemoss_cms
 
 echo "Starting deployment..."
 
