@@ -189,6 +189,15 @@ class PodcastFeedView(View):
                 # Zero-pad the episode number for consistent formatting
                 episode_padded = f"{episode.episode_number:03d}"
 
+                # The audio URL comes from the file field rather than the
+                # episode number: uploads that collide with an existing name
+                # are stored suffixed (e.g. 202_ji3idy2.mp3), and the feed must
+                # advertise the same file the site plays. Storage backends
+                # return either a MEDIA_URL-rooted path or an absolute CDN URL.
+                audio_url = episode.audio_file.url if episode.audio_file else ""
+                if audio_url and not audio_url.startswith(("http://", "https://")):
+                    audio_url = f"{root_url}{audio_url}"
+
                 # Get file size accurately
                 try:
                     if episode.audio_file and os.path.exists(episode.audio_file.path):
@@ -250,7 +259,7 @@ class PodcastFeedView(View):
                         else f"itm-ep{episode.episode_number}"
                     ),
                     enclosure={
-                        "url": f"{root_url}/media/episodes/{episode_padded}.mp3",
+                        "url": audio_url,
                         "length": file_size,
                         "mime_type": "audio/mpeg",
                     },
