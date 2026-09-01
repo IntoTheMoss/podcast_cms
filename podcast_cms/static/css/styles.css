@@ -626,8 +626,8 @@ main.radio {
 .radio-wave {
   display: block;
   width: 100%;
-  height: 150px;
-  margin: 1.5rem 0 0.5rem;
+  height: 200px;
+  margin: 1.2rem 0 0.5rem;
 }
 
 .radio-now {
@@ -684,6 +684,24 @@ main.radio {
   margin-left: 6px;
 }
 
+.radio-button-main .icon-pause,
+.radio-button-main.is-playing .icon-play {
+  display: none;
+}
+
+.radio-button-main.is-playing .icon-pause {
+  display: block;
+}
+
+.radio-button-mute .icon-muted,
+.radio-button-mute[aria-pressed="true"] .icon-unmuted {
+  display: none;
+}
+
+.radio-button-mute[aria-pressed="true"] .icon-muted {
+  display: block;
+}
+
 .radio-button-main.is-playing {
   border-color: rgba(143, 208, 122, 0.75);
   box-shadow: 0 0 34px rgba(143, 208, 122, 0.22);
@@ -720,7 +738,7 @@ main.radio {
   }
 
   .radio-wave {
-    height: 110px;
+    height: 140px;
   }
 
   .radio-button-main {

@@ -30,7 +30,8 @@
   var webAudioDisabled = false;
   var flatFrames = 0;
 
-  var POINTS = 72;
+  var POINTS = 96;
+  var DRIVE = 3.4;   // how hard the analyser sample is pushed into softClip
   var energy = 0;       // eased 0..1: how far the line has opened up
   var targetEnergy = 0;
   var level = 0;        // eased peak amplitude from the analyser
@@ -57,6 +58,14 @@
     );
   }
 
+  // Math.tanh in one line, for the browsers that predate it. Maps any input
+  // onto -1..1, easing off near the limits so loud peaks compress rather than
+  // square off flat against the top of the canvas.
+  function softClip(v) {
+    var e = Math.exp(2 * v);
+    return (e - 1) / (e + 1);
+  }
+
   function draw(now) {
     var t = now / 1000;
     var width = canvas.clientWidth;
@@ -81,6 +90,9 @@
       } else {
         flatFrames = 0;
       }
+      // Only used to brighten the glow. Deliberately kept out of the
+      // amplitude: smoothing the peak across frames is what flattens
+      // transients, and the transients are the point.
       level += (Math.min(1, peak / 90) - level) * 0.12;
     } else {
       level += (0 - level) * 0.06;
@@ -93,9 +105,10 @@
     }
 
     // Idle keeps a faint drift so the line always reads as a signal; playing
-    // opens it up, with the analyser adding the detail on top. The constants
-    // are chosen so a full-scale sample lands just inside the canvas.
-    var amplitude = mid * (0.06 + energy * (0.13 + level * 0.28));
+    // opens it up to nearly the full height. The sample is driven hard and
+    // then run through tanh, so quiet passages stay small while peaks spike
+    // and flatten against the edge instead of clipping straight through it.
+    var reach = mid * (0.10 + energy * 0.82);
 
     ctx.clearRect(0, 0, width, height);
 
@@ -104,11 +117,11 @@
       var p = n / POINTS;
       // Taper both ends so the line fades into the page instead of stopping.
       var taper = Math.sin(p * Math.PI);
-      var value = synthetic(p * 2.0, reduceMotion ? 0 : t) * 0.4;
+      var value = synthetic(p * 2.0, reduceMotion ? 0 : t) * (live ? 0.18 : 1);
       if (live) {
-        value += ((analyserData[Math.floor(p * (analyserData.length - 1))] - 128) / 128) * 1.6;
+        value += ((analyserData[Math.floor(p * (analyserData.length - 1))] - 128) / 128) * DRIVE;
       }
-      points.push({ x: p * width, y: mid + value * amplitude * taper });
+      points.push({ x: p * width, y: mid + softClip(value) * reach * taper });
     }
 
     var gradient = ctx.createLinearGradient(0, 0, width, 0);
@@ -198,9 +211,9 @@
 
   /* -------------------------------------------------------------- controls */
 
+  // Which icon shows is a CSS matter, keyed off .is-playing; all this does is
+  // set the state and the label.
   function setIcons(playing) {
-    toggle.querySelector('.icon-play').hidden = playing;
-    toggle.querySelector('.icon-pause').hidden = !playing;
     toggle.setAttribute('aria-label', playing ? 'Pause the radio' : 'Play the radio');
     toggle.classList.toggle('is-playing', playing);
     ensureFrame();
@@ -264,10 +277,12 @@
   if (muteButton) {
     muteButton.addEventListener('click', function () {
       audio.muted = !audio.muted;
-      muteButton.querySelector('.icon-unmuted').hidden = audio.muted;
-      muteButton.querySelector('.icon-muted').hidden = !audio.muted;
+      // aria-pressed both announces the state and selects the icon in CSS.
       muteButton.setAttribute('aria-pressed', audio.muted ? 'true' : 'false');
       muteButton.setAttribute('aria-label', audio.muted ? 'Unmute' : 'Mute');
+      // Muting has no analyser signal behind it, so let the line settle back
+      // to its idle drift rather than swinging at full height in silence.
+      targetEnergy = !audio.paused && !audio.muted ? 1 : 0;
       ensureFrame();
     });
   }
