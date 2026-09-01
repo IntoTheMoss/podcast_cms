@@ -107,3 +107,71 @@ The project uses modern Django/Wagtail versions with key dependencies:
 - Pillow for image processing
 - psycopg2-binary for PostgreSQL support
 - django-environ for environment management
+
+## Radio Moss
+
+A 24/7 Icecast stream of the shuffled back catalogue, with a player page at
+`/radio` (`radio()` in `podcast/views.py`, `radio_page.html`,
+`static/js/radio.js`, the `.radio-*` rules in `styles.css`).
+
+The stream is a **separate project** at `/var/www/podcast_radio` (Liquidsoap +
+Icecast), not in this repo. Its config lives in `/var/www/podcast_radio/.env`,
+read by systemd as an `EnvironmentFile` — setting those variables in a shell
+profile does nothing, because the unit does not run a login shell and runs as
+`podcast_radio`, not root. Restarting `podcast-radio` drops listeners for
+10-20s while Liquidsoap reconnects to Icecast, so batch changes to that file.
+
+### Things that will waste your time
+
+- **Deploying static files.** `STORAGES` uses `ManifestStaticFilesStorage`, so
+  production serves hashed filenames. Editing a file under
+  `podcast_cms/static/` changes nothing live until `collectstatic` runs. The
+  app service is `gunicorn-intothemoss`, not `gunicorn`.
+- **`hidden` does nothing on an inline `<svg>`.** The UA stylesheet rule that
+  implements it is scoped to the XHTML namespace, so it never matches an SVG
+  element. Both icons render. Drive icon visibility from CSS instead — see
+  `.radio-button-main.is-playing` and `.radio-button-mute[aria-pressed]`.
+- **Icecast already sends `Access-Control-Allow-Origin: *`.** Do not add
+  another in the nginx `radio.intothemoss.com` block: two of the header makes
+  browsers fail the CORS check outright, which is worse than none.
+- **Never let the waveform code touch playback.** `radio.js` once carried a
+  heuristic that watched for a flat analyser signal and rebuilt the audio
+  element to recover from a tainted graph. It misfired and killed the stream
+  about 7s in, and removing the element from the DOM rejected the in-flight
+  `play()` promise, so the recovery also painted an error over its own new
+  element. Web Audio is now gated on an up-front `fetch` CORS probe and no
+  drawing path may pause, reload or replace the element. Keep it that way.
+- **A rejected `play()` promise is not necessarily an error.** Pausing or
+  reloading an element rejects it with `AbortError`. Check that before
+  reporting a failure, and check the attempt has not been superseded.
+
+### Storage note
+
+`settings.py` lines 139-155 configure DigitalOcean Spaces and set the
+deprecated `DEFAULT_FILE_STORAGE`, but line 161 sets `STORAGES["default"]` to
+`FileSystemStorage` unconditionally. Under Django 5.2 `STORAGES` wins, so the
+Spaces branch is dead code. Media is on local disk.
+
+Django never overwrites a colliding upload; `FileSystemStorage` appends a
+random suffix (`202_ji3idy2.mp3`). The feed therefore builds enclosure URLs
+from `episode.audio_file.url`, never from the episode number, so the feed and
+the site always advertise the same file. Do not "tidy" that back into a
+number-derived path.
+
+`media/orphaned_episodes/` holds 199 quarantined files that no episode page
+references. They are moved, not deleted, pending a decision on episodes 109
+and 115, which have files but no pages.
+
+### Not visually verified
+
+The radio page was built and deployed from a server with no browser. Its
+markup, assets, endpoints and headers are confirmed; its appearance and
+behaviour in a real browser are not. Worth checking with a browser:
+
+1. The waveform's depth and how hard it spikes — `DRIVE` in `radio.js` is the
+   dial, tuned by arithmetic rather than by eye.
+2. That play/pause and mute/unmute each show exactly one icon.
+3. That the stream plays continuously for several minutes without stopping.
+4. Whether the analyser is actually feeding the waveform, or it has quietly
+   fallen back to the synthetic squiggle — the console says which.
+5. Layout at mobile widths, and with `prefers-reduced-motion` set.

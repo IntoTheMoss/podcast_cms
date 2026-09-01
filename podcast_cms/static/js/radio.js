@@ -28,7 +28,8 @@
   var analyser = null;
   var analyserData = null;
   var webAudioDisabled = false;
-  var flatFrames = 0;
+  var corsReady = false;  // set by the probe below
+  var playToken = 0;
 
   var POINTS = 96;
   var DRIVE = 3.4;   // how hard the analyser sample is pushed into softClip
@@ -77,18 +78,9 @@
     if (live) {
       analyser.getByteTimeDomainData(analyserData);
       var peak = 0;
-      var flat = true;
       for (i = 0; i < analyserData.length; i += 4) {
         var v = Math.abs(analyserData[i] - 128);
         if (v > peak) peak = v;
-        if (v > 1) flat = false;
-      }
-      // A perfectly flat signal for several seconds means a tainted graph,
-      // not quiet music: recover rather than go on playing silence.
-      if (flat && audio.currentTime > 3) {
-        if (++flatFrames > 300) dropWebAudio();
-      } else {
-        flatFrames = 0;
       }
       // Only used to brighten the glow. Deliberately kept out of the
       // amplitude: smoothing the peak across frames is what flattens
@@ -169,8 +161,14 @@
 
   /* ------------------------------------------------------------ web audio */
 
+  // Routing the element through a MediaElementSource is irreversible, and a
+  // response the browser will not share cross-origin gets silently replaced
+  // with silence once it is routed. So this is only ever done after a fetch
+  // of the same URL has proved the CORS check passes; if it has not, the
+  // waveform stays synthetic and playback is left well alone. Nothing in the
+  // drawing code may ever stop, pause or replace the audio element.
   function setupAnalyser() {
-    if (analyser || webAudioDisabled) return;
+    if (analyser || webAudioDisabled || !corsReady) return;
     var Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
     try {
@@ -189,24 +187,20 @@
     }
   }
 
-  // Once an element is routed through a MediaElementSource that routing is
-  // permanent, so recovering means starting again with a fresh element.
-  function dropWebAudio() {
-    webAudioDisabled = true;
-    analyser = null;
-    flatFrames = 0;
-    if (audioCtx) {
-      audioCtx.close();
-      audioCtx = null;
-    }
-    var fresh = audio.cloneNode(false);
-    fresh.removeAttribute('crossorigin');
-    fresh.removeAttribute('src');
-    audio.pause();
-    audio.parentNode.replaceChild(fresh, audio);
-    audio = fresh;
-    bindAudioEvents();
-    start();
+  function probeCors() {
+    if (!window.fetch || !window.AbortController) return;
+    var controller = new AbortController();
+    fetch(streamUrl, { mode: 'cors', cache: 'no-store', signal: controller.signal })
+      .then(function (response) {
+        corsReady = response.ok;
+      })
+      .catch(function () {
+        corsReady = false;
+        console.info('Radio: stream is not CORS-readable, waveform will be synthetic.');
+      })
+      .then(function () {
+        controller.abort(); // headers are all we needed; do not pull the stream
+      });
   }
 
   /* -------------------------------------------------------------- controls */
@@ -224,6 +218,7 @@
   }
 
   function start() {
+    var token = ++playToken;
     audio.src = streamUrl;
     setupAnalyser();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -232,7 +227,12 @@
     setIcons(true);
     var played = audio.play();
     if (played && played.catch) {
-      played.catch(function () {
+      played.catch(function (error) {
+        // A play() promise rejects when we pause or reload the element too,
+        // so only report a rejection that belongs to the current attempt and
+        // is not simply us having interrupted it.
+        if (token !== playToken) return;
+        if (error && error.name === 'AbortError') return;
         targetEnergy = 0;
         setIcons(false);
         setStatus('Could not start the stream');
@@ -243,6 +243,7 @@
   // A live stream has no meaningful paused position: drop the connection so
   // the next play reconnects at the live edge rather than behind it.
   function stop() {
+    playToken++;
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
@@ -254,6 +255,7 @@
 
   function bindAudioEvents() {
     audio.addEventListener('playing', function () {
+      setupAnalyser(); // in case the probe only landed after the first click
       targetEnergy = 1;
       setIcons(true);
       pollNowPlaying();
@@ -321,6 +323,7 @@
     ensureFrame();
   });
   resize();
+  probeCors();
   bindAudioEvents();
   setIcons(false);
   setStatus('Off air');

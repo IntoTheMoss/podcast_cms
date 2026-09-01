@@ -11,6 +11,7 @@ A Django/Wagtail-based content management system for the "Into the Moss" podcast
 - **Media Management**: Local development storage with DigitalOcean Spaces integration for production
 - **Automatic Duration Detection**: Uses mutagen to extract audio duration from MP3 files
 - **Wagtail CMS**: Full-featured content management with user-friendly admin interface
+- **Radio Moss**: A player page at `/radio` for the 24/7 Icecast stream of the back catalogue
 
 ## Requirements
 
@@ -98,6 +99,31 @@ python manage.py fix_episode_slugs
 # Fix publication dates for episodes
 python manage.py fix_publication_dates
 ```
+
+## Radio Moss
+
+A continuous shuffle of the episode archive streams from `radio.intothemoss.com`,
+with a player page at `/radio` on the main site.
+
+The stream itself is a **separate project** at `/var/www/podcast_radio`
+(Liquidsoap building a playlist, Icecast serving it). This repo only owns the
+player page:
+
+| Piece | Path |
+| --- | --- |
+| View | `podcast/views.py` &rarr; `radio()` |
+| Route | `podcast/urls.py` &rarr; `/radio` |
+| Template | `podcast/templates/podcast/radio_page.html` |
+| Waveform + controls | `podcast_cms/static/js/radio.js` |
+| Styles | `podcast_cms/static/css/styles.css` (`.radio-*`) |
+
+The stream and status URLs default to the production subdomain and can be
+overridden with `RADIO_STREAM_URL` and `RADIO_STATUS_URL` in settings.
+
+The page lives on the main domain rather than on `radio.intothemoss.com` so it
+can load the site stylesheet and the self-hosted `charming_smile` font
+same-origin; cross-origin those would need CORS headers and would silently fall
+back to a system font. The subdomain root redirects here.
 
 ## Deployment
 
