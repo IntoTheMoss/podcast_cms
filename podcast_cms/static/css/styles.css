@@ -295,6 +295,60 @@ article .info {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Radio: the one menu item that gets an icon, so it reads as the way in */
+.site-menu a.site-menu-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 1.2rem;
+  color: #d8e8cf;
+}
+
+.site-menu a.site-menu-radio:hover {
+  background: rgba(160, 200, 140, 0.14);
+  color: #eaf5e3;
+}
+
+.site-menu-radio-icon {
+  flex: none;
+}
+
+.site-menu-radio-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.site-menu-radio-text small {
+  font-size: 0.72rem;
+  color: rgba(216, 232, 207, 0.6);
+}
+
+.site-menu-radio-live {
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8fd07a;
+  box-shadow: 0 0 0 0 rgba(143, 208, 122, 0.7);
+  animation: radio-pulse 2s ease-out infinite;
+}
+
+@keyframes radio-pulse {
+  70% {
+    box-shadow: 0 0 0 8px rgba(143, 208, 122, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(143, 208, 122, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-menu-radio-live {
+    animation: none;
+  }
+}
+
 .site-menu button.copy-feed-link {
   display: block;
   width: 100%;
