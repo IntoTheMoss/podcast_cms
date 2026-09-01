@@ -3,6 +3,7 @@ import traceback
 import random
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 from django.utils.feedgenerator import Rss201rev2Feed
 from django.views.generic import View
 from django.urls import reverse
@@ -296,6 +297,29 @@ class PodcastFeedView(View):
         except Exception as e:
             error_message = f"Error generating feed: {str(e)}\n{traceback.format_exc()}"
             return HttpResponse(error_message, content_type="text/plain", status=500)
+
+
+def radio(request):
+    """The live radio stream player.
+
+    Both URLs point at the Icecast mount on the radio subdomain rather than
+    at anything Django serves. They are settings-driven so the stream can be
+    moved without a template change.
+    """
+    return render(
+        request,
+        "podcast/radio_page.html",
+        {
+            "stream_url": getattr(
+                settings, "RADIO_STREAM_URL", "https://radio.intothemoss.com/stream"
+            ),
+            "status_url": getattr(
+                settings,
+                "RADIO_STATUS_URL",
+                "https://radio.intothemoss.com/status-json.xsl",
+            ),
+        },
+    )
 
 
 def random_episode(request):

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Into the Moss | Radio{% endblock %}
+
+{% block main_class %}radio{% endblock %}
+
+{% block content %}
+<a href="/" class="back-button" title="All episodes">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"></line>
+    <polyline points="12 19 5 12 12 5"></polyline>
+  </svg>
+</a>
+
+<div class="radio-stage">
+  <h1 class="radio-title">Moss Radio</h1>
+  <p class="radio-strap">A continuous drift through the archive</p>
+
+  <canvas id="radio-wave" class="radio-wave" aria-hidden="true"></canvas>
+
+  <p id="radio-now" class="radio-now" role="status" aria-live="polite">Off air</p>
+
+  <div class="radio-controls">
+    <button
+      type="button"
+      id="radio-toggle"
+      class="radio-button radio-button-main"
+      aria-label="Play the radio"
+    >
+      <svg class="icon-play" viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true">
+        <path d="M8 5.5v13a1 1 0 0 0 1.53.85l10.2-6.5a1 1 0 0 0 0-1.7L9.53 4.65A1 1 0 0 0 8 5.5z"></path>
+      </svg>
+      <svg class="icon-pause" viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true" hidden>
+        <rect x="6" y="4.5" width="4.4" height="15" rx="1.4"></rect>
+        <rect x="13.6" y="4.5" width="4.4" height="15" rx="1.4"></rect>
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      id="radio-mute"
+      class="radio-button radio-button-mute"
+      aria-label="Mute"
+      aria-pressed="false"
+    >
+      <svg class="icon-unmuted" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M11 5 6.5 9H3v6h3.5L11 19z"></path>
+        <path d="M15.5 8.8a4.5 4.5 0 0 1 0 6.4"></path>
+        <path d="M18.4 6a8.5 8.5 0 0 1 0 12"></path>
+      </svg>
+      <svg class="icon-muted" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+        <path d="M11 5 6.5 9H3v6h3.5L11 19z"></path>
+        <path d="m16 9.5 5 5M21 9.5l-5 5"></path>
+      </svg>
+    </button>
+  </div>
+
+  <p class="radio-note">
+    Prefer your own player?
+    <a href="{{ stream_url }}" target="_blank" rel="noopener">Open the raw stream</a>.
+  </p>
+</div>
+
+<audio
+  id="radio-audio"
+  preload="none"
+  crossorigin="anonymous"
+  data-stream-url="{{ stream_url }}"
+  data-status-url="{{ status_url }}"
+></audio>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/radio.js' %}"></script>
+{% endblock %}
