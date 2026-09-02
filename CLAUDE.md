@@ -90,6 +90,43 @@ Episodes have both sequential numbering (`episode_number`) and season-specific n
 - Detects audio duration from MP3 files
 - Handles cover image resizing and optimization
 
+#### GUIDs are minted once and must never change
+
+`save()` sets `guid` to `itm<YYYYMMDD>` from `publication_date` **only when
+it is blank**. It is never regenerated, so moving an episode's date leaves
+the guid behind. That is correct: `guid` is the RSS `unique_id`, and changing
+it makes every subscriber's app treat the episode as new — re-downloading it,
+often duplicating it in their library.
+
+Episode 200 is the visible case: `guid=itm20250321`, `publication_date=25 Apr
+2025`. It was minted for the 21 Mar slot (the next weekly slot after ep199 on
+14 Mar), then slipped to 25 Apr and became the season 14 opener instead. The
+mismatch is cosmetic and **deliberately left alone**. A guid only has to be
+unique and stable, not meaningful. Don't "fix" it.
+
+#### ID3 tags are written from the CMS at publish time
+
+`podcast/id3.py` writes each episode's metadata into its own MP3; the
+`page_published` hook in `podcast/signals.py` fires it on every publish, and
+`manage.py retag_episodes` handles bulk cases (`--season`, `--since`,
+explicit numbers, `--dry-run`). The frame set matches what episodes 1-195
+already carried from a pre-Wagtail deployment script.
+
+This exists because Radio Moss reads titles off the files, not the CMS, and
+**Icecast keeps displaying whatever title it was last sent** — so an untagged
+track showed the *previous* episode's name. Episodes 196-237 shipped untagged
+and did this for 18% of the rotation until 2026-09-02.
+
+Two things to preserve: tagging failures are logged and swallowed, never
+raised, so a missing file can't block an editorial publish; and re-tagging
+runs on *every* publish, which is what pushes a metadata correction out to
+files that are already live. Registered in `PodcastConfig.ready()`, so the
+app needs a restart (`gunicorn-intothemoss`) for changes to take effect.
+
+Tagging writes in place via `audio_file.path`, so it assumes local disk. If
+media ever moves to Spaces it raises a clean `TaggingError` rather than
+failing obscurely — see the storage note below.
+
 ### Environment Configuration
 
 Key environment variables:
