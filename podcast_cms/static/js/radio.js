@@ -144,12 +144,23 @@
     ctx.shadowBlur = 0;
   }
 
+  // Under prefers-reduced-motion the line still needs to show the stream is
+  // alive, so it keeps updating — just as discrete steps a couple of times a
+  // second rather than a smooth 60fps sweep, which is what the media feature
+  // is actually asking us to avoid.
+  var REDUCED_MOTION_INTERVAL = 700; // ms between redraws
+  var lastReducedDraw = -Infinity;
+
   function frame(now) {
-    draw(now || 0);
+    now = now || 0;
     if (reduceMotion) {
-      looping = false; // one-shot: redraw only when the state changes
-      return;
+      if (now - lastReducedDraw < REDUCED_MOTION_INTERVAL) {
+        window.requestAnimationFrame(frame);
+        return;
+      }
+      lastReducedDraw = now;
     }
+    draw(now);
     window.requestAnimationFrame(frame);
   }
 
